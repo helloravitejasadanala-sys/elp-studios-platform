@@ -5,6 +5,7 @@ const topbar = $("#topbar-actions");
 const state = {
   config: null,
   token: sessionStorage.getItem("elpToken") || "",
+  signedIn: sessionStorage.getItem("elpSignedIn") === "1",
   view: "login",
   events: [],
   storage: null,
@@ -87,7 +88,7 @@ async function api(path, opts = {}) {
     headers["Content-Type"] = "application/json";
     opts.body = JSON.stringify(opts.json);
   }
-  const res = await fetch("/pp" + path, { ...opts, headers });
+  const res = await fetch("/pp" + path, { ...opts, headers, credentials: "include" });
   const text = await res.text();
   let data = {};
   try {
@@ -104,21 +105,46 @@ async function api(path, opts = {}) {
   return data;
 }
 
+function clearLocalSession() {
+  state.token = "";
+  state.signedIn = false;
+  sessionStorage.removeItem("elpToken");
+  sessionStorage.removeItem("elpSignedIn");
+}
+
+function markSignedIn(token) {
+  state.signedIn = true;
+  sessionStorage.setItem("elpSignedIn", "1");
+  if (token) {
+    state.token = token;
+    sessionStorage.setItem("elpToken", token);
+  } else {
+    state.token = "";
+    sessionStorage.removeItem("elpToken");
+  }
+}
+
+async function logoutPicPeak() {
+  try {
+    await api("/api/auth/logout", { method: "POST" });
+  } catch {
+    /* still clear the console view; cookie clear is the server's job */
+  }
+  clearLocalSession();
+  state.view = "login";
+  render();
+}
+
 function render() {
   topbar.innerHTML = "";
-  if (state.token) {
+  if (state.signedIn) {
     topbar.innerHTML = `
       <button class="btn" data-go="dashboard">Galleries</button>
       <button class="btn" data-go="storage">Storage</button>
       <button class="btn primary" data-go="wizard">New gallery</button>
       <button class="btn ghost" id="logout">Log out</button>
     `;
-    $("#logout").onclick = () => {
-      state.token = "";
-      sessionStorage.removeItem("elpToken");
-      state.view = "login";
-      render();
-    };
+    $("#logout").onclick = () => logoutPicPeak();
   }
   topbar.querySelectorAll("[data-go]").forEach((btn) => {
     btn.onclick = () => {
@@ -126,7 +152,7 @@ function render() {
       render();
     };
   });
-  if (!state.token || state.view === "login") return renderLogin();
+  if (!state.signedIn || state.view === "login") return renderLogin();
   if (state.view === "wizard") return renderWizard();
   if (state.view === "event") return renderEvent();
   if (state.view === "storage") return renderStorage();
@@ -152,15 +178,31 @@ function renderLogin() {
         method: "POST",
         json: { username: $("#user").value, password: $("#pass").value },
       });
-      state.token = data.token || data.user?.token || "";
-      if (!state.token) throw new Error("PicPeak did not return a session token.");
-      sessionStorage.setItem("elpToken", state.token);
+      if (data.mfaRequired) {
+        throw new Error("This admin account requires 2FA. Finish sign-in in PicPeak Admin at /admin, then try again.");
+      }
+      if (!data.user) {
+        throw new Error("PicPeak rejected the login (no admin user in the response).");
+      }
       if (data.mustChangePassword || data.user?.mustChangePassword) {
         $("#login-error").textContent = "PicPeak requires an admin password change in /admin first.";
         return;
       }
+      // aio:stable puts the JWT in the HttpOnly admin_token cookie, not in JSON.
+      const jsonToken = data.token || data.user?.token || "";
+      markSignedIn(jsonToken || "");
+      try {
+        const session = await api("/api/auth/session");
+        if (session.valid === false) {
+          throw new Error(session.error || "PicPeak session cookie was not accepted.");
+        }
+      } catch (sessionErr) {
+        clearLocalSession();
+        throw sessionErr;
+      }
       state.view = "dashboard";
       await bootstrap();
+      await loadEvents();
       render();
     } catch (err) {
       $("#login-error").textContent = err.message;
@@ -710,6 +752,7 @@ function simpleUpload(eventId, file, bar) {
     fd.append("photos", file, file.name);
     const xhr = new XMLHttpRequest();
     xhr.open("POST", `/pp/api/admin/events/${eventId}/upload`);
+    xhr.withCredentials = true;
     if (state.token) xhr.setRequestHeader("Authorization", "Bearer " + state.token);
     xhr.upload.onprogress = (e) => {
       if (e.lengthComputable && bar) bar.style.width = Math.round((e.loaded / e.total) * 100) + "%";
@@ -735,12 +778,12 @@ async function chunkedUpload(eventId, file, bar) {
   const chunks = Math.ceil(file.size / size);
   for (let i = 0; i < chunks; i++) {
     const blob = file.slice(i * size, Math.min(file.size, (i + 1) * size));
+    const chunkHeaders = { "Content-Type": "application/octet-stream" };
+    if (state.token) chunkHeaders.Authorization = "Bearer " + state.token;
     const res = await fetch(`/pp/api/admin/photos/${eventId}/chunked-upload/${uploadId}/chunk/${i}`, {
       method: "POST",
-      headers: {
-        Authorization: "Bearer " + state.token,
-        "Content-Type": "application/octet-stream",
-      },
+      credentials: "include",
+      headers: chunkHeaders,
       body: blob,
     });
     if (!res.ok) throw new Error(`Chunk ${i} failed: ${await res.text()}`);
@@ -755,7 +798,7 @@ async function chunkedUpload(eventId, file, bar) {
 async function loadStorageReport() {
   const headers = {};
   if (state.token) headers.Authorization = `Bearer ${state.token}`;
-  const res = await fetch("/elp/storage-report", { headers });
+  const res = await fetch("/elp/storage-report", { headers, credentials: "include" });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
   state.storageReport = data;
@@ -1048,14 +1091,16 @@ function esc(s) {
 
 async function start() {
   state.config = await (await fetch("/config.json")).json();
-  if (state.token) {
+  if (state.signedIn || state.token) {
     try {
+      const session = await api("/api/auth/session");
+      if (session.valid === false) throw new Error(session.error || "session");
+      markSignedIn(state.token);
       await bootstrap();
       await loadEvents();
       state.view = "dashboard";
     } catch {
-      state.token = "";
-      sessionStorage.removeItem("elpToken");
+      clearLocalSession();
       state.view = "login";
     }
   }
