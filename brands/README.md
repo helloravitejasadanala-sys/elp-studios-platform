@@ -1,9 +1,13 @@
 # Brand assets
 
-Each brand folder (`mini-momentz/`, `tattva-weddings/`, …) holds a `brand.json`: display name, **logo placeholder path**, typography/colour notes, and default **style** id (`wedding-editorial` or `modern-story`).
+Each brand folder holds `brand.json` plus genuine `logos/` when supplied.
 
-`placeholders/` contains **labelled demo logos** for Mini Momentz, Katha Films, and Tattva Weddings — not official marks.
+| Brand | Logos | Default style |
+| --- | --- | --- |
+| `tattva-weddings/` | Owner SVG/raster in `logos/` (Deep Crimson primary preferred) | `wedding-editorial` |
+| `mini-momentz/` | Colour + light logos in `logos/` | `modern-story` |
+| `elp-studios/` | Platform/admin mark in `logos/` | (admin chrome) |
 
-Fonts and colours live in `styles/` (shared visual systems) plus brand notes. Change tokens in config and re-apply the PicPeak CSS template — no app rebuild.
+`placeholders/` retained as legacy labelled stand-ins — demos now prefer `logos/` from owner assets (`media/brand-assets/`).
 
-Replace with owner-supplied logos, fonts, and palettes when available. Do not invent official brand marks. Do not use real client photographs here.
+Fonts still use documented fallbacks until licensed files arrive. Do not redraw or alter logos. Do not use real client photographs here.

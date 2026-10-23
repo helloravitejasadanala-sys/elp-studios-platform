@@ -41,7 +41,8 @@ Last updated: 2026-10-23 (Style A/B + owner brand specs applied).
 | Futura Now / Peach Blossom | **Not shipped** — documented geometric fallbacks; Peach Blossom skipped |
 | Bizantheum / Canela Trial | **Not shipped** — no PDF extraction; Georgia/system serif fallback |
 | Poppins Light | Prefer when self-hosted; PicPeak CSS sanitizer blocks external font `@import` |
-| Official logos | **Placeholders only** — no separate genuine logo files in store |
+| Official logos | **Wired** — owner SVG/JPEG in `brands/*/logos/` (Tattva Deep Crimson primary SVG; Mini colour JPG; ELP admin JPG). Light Mini logo reserved for dark covers. |
+| Licensed brand fonts | **Still fallbacks** — Futura Now / Bizantheum / Canela / Peach Blossom / Poppins not embedded until owner supplies licensed files |
 
 ## Unfinished / planned
 

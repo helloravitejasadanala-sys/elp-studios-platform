@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Capture desktop + mobile screenshots for Style A (Tattva) and Style B (Mini Momentz).
 
-Writes NEW files under Project store media/gallery-prototype/ as 20-tattva-… / 21-mini-…
-Does not overwrite earlier 01–13 proof shots.
+Default prefix `22` (genuine logos). Override with SHOT_PREFIX=20 to refresh older series.
+Does not overwrite 01–13 proof shots.
 """
 from __future__ import annotations
 
@@ -16,8 +16,9 @@ from playwright.sync_api import sync_playwright
 
 ORIGIN = os.environ.get("ORIGIN", "http://127.0.0.1:3000")
 ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL", "admin@elp.local")
-ADMIN_PASS = os.environ.get("ADMIN_PASSWORD", "ElpDemo2026!")
+ADMIN_PASS = os.environ.get("ADMIN_PASSWORD", "ElpStudioDemo2026!")
 GUEST_PASS = os.environ.get("GUEST_PASSWORD", "GuestDemo1")
+PREFIX = os.environ.get("SHOT_PREFIX", "22")
 OUT = Path(
     os.environ.get(
         "SCREENSHOT_DIR",
@@ -74,11 +75,10 @@ def guest_enter(page, url: str):
         time.sleep(2.5)
 
 
-def capture_brand(browser, brand_key: str, g: dict, prefix: str):
+def capture_brand(browser, g: dict, prefix: str):
     url = f"{ORIGIN}{g['client_path']}"
     label = f"{g['brand_display']} / {g['style_display']}"
 
-    # Desktop — password gate
     ctx = browser.new_context(viewport={"width": 1440, "height": 900})
     page = ctx.new_page()
     page.goto(url, wait_until="networkidle", timeout=90000)
@@ -90,10 +90,9 @@ def capture_brand(browser, brand_key: str, g: dict, prefix: str):
     time.sleep(0.9)
     shot(page, f"{prefix}-sets-grid-desktop.png")
 
-    # Try open first photo (fullscreen)
     imgs = page.locator("img").all()
     opened = False
-    for img in imgs[1:6]:
+    for img in imgs[1:8]:
         try:
             img.click(timeout=2000)
             time.sleep(1.5)
@@ -107,7 +106,6 @@ def capture_brand(browser, brand_key: str, g: dict, prefix: str):
         time.sleep(0.5)
     ctx.close()
 
-    # Mobile
     mctx = browser.new_context(
         viewport={"width": 390, "height": 844},
         is_mobile=True,
@@ -133,15 +131,17 @@ def capture_brand(browser, brand_key: str, g: dict, prefix: str):
 
 
 def main() -> int:
+    tattva_prefix = f"{PREFIX}-tattva-editorial"
+    mini_prefix = f"{PREFIX}-mini-modern"
+    admin_name = f"{PREFIX}-admin-events-logos-desktop.png"
+
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
 
-        # Admin events list (shows both styled galleries)
         ctx = browser.new_context(viewport={"width": 1440, "height": 900})
         page = ctx.new_page()
         page.goto(f"{ORIGIN}/admin", wait_until="networkidle", timeout=90000)
         time.sleep(0.8)
-        # Login — email or username field
         email = page.locator('input[type="email"]')
         user = page.locator('input[name="username"], input[type="text"]').first
         if email.count():
@@ -160,46 +160,40 @@ def main() -> int:
         page.goto(f"{ORIGIN}/admin/events", wait_until="networkidle")
         time.sleep(1.2)
         dismiss_dialogs(page)
-        shot(page, "20-admin-events-styles-desktop.png")
+        shot(page, admin_name)
         ctx.close()
 
-        capture_brand(browser, "tattva", tattva, "20-tattva-editorial")
-        capture_brand(browser, "mini", mini, "21-mini-modern")
+        capture_brand(browser, tattva, tattva_prefix)
+        capture_brand(browser, mini, mini_prefix)
 
         browser.close()
 
-    # Append index note (do not wipe prior README entries)
-    index = OUT / "STYLES_SCREENSHOTS.md"
+    index = OUT / "LOGOS_SCREENSHOTS.md"
     lines = [
-        "# Style A + Style B prototype screenshots",
+        "# Genuine logo screenshots (Style A + Style B)",
         "",
         f"Captured against `{ORIGIN}` at `{time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())}`.",
+        f"Prefix: `{PREFIX}-*`",
         "",
-        f"- **Tattva Weddings / Wedding Editorial:** `{ORIGIN}{tattva['client_path']}`",
-        f"- **Mini Momentz / Modern Story:** `{ORIGIN}{mini['client_path']}`",
+        f"- **Tattva** (Deep Crimson primary SVG): `{ORIGIN}{tattva['client_path']}`",
+        f"- **Mini Momentz** (colour logo): `{ORIGIN}{mini['client_path']}`",
+        "",
+        "Fonts remain documented fallbacks until licensed files are supplied.",
         "",
         "| File | Description |",
         "| --- | --- |",
-        "| `20-admin-events-styles-desktop.png` | Admin events — both styled galleries |",
-        "| `20-tattva-editorial-password-desktop.png` | Tattva password gate (desktop) |",
-        "| `20-tattva-editorial-cover-desktop.png` | Tattva cover / hero (desktop) |",
-        "| `20-tattva-editorial-sets-grid-desktop.png` | Tattva sets + grid (desktop) |",
-        "| `20-tattva-editorial-photo-view-desktop.png` | Tattva photo view (desktop) |",
-        "| `20-tattva-editorial-password-mobile.png` | Tattva password (mobile) |",
-        "| `20-tattva-editorial-cover-mobile.png` | Tattva cover (mobile) |",
-        "| `20-tattva-editorial-sets-grid-mobile.png` | Tattva sets (mobile) |",
-        "| `21-mini-modern-password-desktop.png` | Mini Momentz password (desktop) |",
-        "| `21-mini-modern-cover-desktop.png` | Mini Momentz cover (desktop) |",
-        "| `21-mini-modern-sets-grid-desktop.png` | Mini Momentz sets + grid (desktop) |",
-        "| `21-mini-modern-photo-view-desktop.png` | Mini Momentz photo view (desktop) |",
-        "| `21-mini-modern-password-mobile.png` | Mini Momentz password (mobile) |",
-        "| `21-mini-modern-cover-mobile.png` | Mini Momentz cover (mobile) |",
-        "| `21-mini-modern-sets-grid-mobile.png` | Mini Momentz sets (mobile) |",
+        f"| `{admin_name}` | Admin events (ELP + client galleries) |",
+        f"| `{tattva_prefix}-password-desktop.png` | Tattva password + logo |",
+        f"| `{tattva_prefix}-cover-desktop.png` | Tattva cover / hero + logo |",
+        f"| `{tattva_prefix}-sets-grid-desktop.png` | Tattva sets |",
+        f"| `{tattva_prefix}-photo-view-desktop.png` | Tattva photo view |",
+        f"| `{tattva_prefix}-*-mobile.png` | Tattva mobile |",
+        f"| `{mini_prefix}-*-desktop.png` / `*-mobile.png` | Mini Momentz |",
         "",
         "## PNG sizes",
         "",
     ]
-    for f in sorted(OUT.glob("2[01]-*.png")):
+    for f in sorted(OUT.glob(f"{PREFIX}-*.png")):
         lines.append(f"- `{f.name}` ({f.stat().st_size} bytes)")
     index.write_text("\n".join(lines) + "\n")
     print(f"wrote {index}")

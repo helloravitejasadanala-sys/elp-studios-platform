@@ -81,6 +81,37 @@ def load_json(path: Path) -> dict:
     return json.loads(path.read_text())
 
 
+def curl_mime_suffix(path: Path) -> str:
+    """curl type hint so PicPeak accepts SVG/JPEG logos and videos."""
+    suf = path.suffix.lower()
+    return {
+        ".svg": ";type=image/svg+xml",
+        ".jpg": ";type=image/jpeg",
+        ".jpeg": ";type=image/jpeg",
+        ".png": ";type=image/png",
+        ".gif": ";type=image/gif",
+        ".webp": ";type=image/webp",
+        ".mp4": ";type=video/mp4",
+        ".mov": ";type=video/quicktime",
+        ".webm": ";type=video/webm",
+    }.get(suf, "")
+
+
+def resolve_brand_logo(brand_id: str, brand: dict) -> Path | None:
+    """Prefer genuine logos.client_primary; fall back to legacy placeholder."""
+    logos = brand.get("logos") or {}
+    candidates = []
+    if logos.get("client_primary"):
+        candidates.append(BRANDS / brand_id / logos["client_primary"])
+    if brand.get("logo_placeholder"):
+        candidates.append((BRANDS / brand_id / brand["logo_placeholder"]).resolve())
+    candidates.append(BRANDS / "placeholders" / f"{brand_id}-logo.png")
+    for p in candidates:
+        if p.exists():
+            return p
+    return None
+
+
 def main() -> int:
     load_env()
     global ADMIN_PASS, ADMIN_USER, ADMIN_EMAIL, GUEST_PASS, ORIGIN
@@ -191,13 +222,30 @@ def main() -> int:
             "company_name": "ELP Studios Galleries",
             "company_tagline": "Style A Wedding Editorial · Style B Modern Story",
             "support_email": ADMIN_EMAIL,
-            "footer_text": "Demo — placeholder logos/fonts/colours until owner brand guidelines. Not Macro.",
+            "footer_text": "Demo galleries — owner logos wired; fonts still use documented fallbacks until licensed files arrive. Not Macro.",
             "watermark_enabled": False,
             "force_color_mode": "light",
             "logo_display_header": True,
             "logo_display_hero": True,
         },
     )
+
+    # Global admin / platform logo (ELP Studios)
+    elp_logo = BRANDS / "elp-studios" / "logos" / "elp-everlast-pixel-studios-logo.jpg"
+    if elp_logo.exists():
+        lo = subprocess.check_output(
+            [
+                "curl", "-s", "-b", jar, "-c", jar, "-X", "POST",
+                f"{ORIGIN}/api/admin/settings/logo",
+                "-H", f"Origin: {ORIGIN}",
+                "-H", f"Authorization: Bearer {token()}",
+                "-F", f"logo=@{elp_logo}{curl_mime_suffix(elp_logo)}",
+            ],
+            text=True,
+        )
+        print("elp admin logo:", lo[:160])
+    else:
+        print("elp admin logo missing:", elp_logo)
 
     # Install CSS templates from styles/ config (slots from style.json)
     style_css_ids: dict[str, int] = {}
@@ -294,21 +342,7 @@ def main() -> int:
                     print("MISSING", f)
                     return 1
                 local_hash = sh256(f)
-                # curl often sends application/octet-stream for .mp4; PicPeak needs a real video MIME
-                mime = ""
-                suf = f.suffix.lower()
-                if suf == ".mp4":
-                    mime = ";type=video/mp4"
-                elif suf == ".mov":
-                    mime = ";type=video/quicktime"
-                elif suf == ".webm":
-                    mime = ";type=video/webm"
-                elif suf in (".jpg", ".jpeg"):
-                    mime = ";type=image/jpeg"
-                elif suf == ".png":
-                    mime = ";type=image/png"
-                elif suf == ".webp":
-                    mime = ";type=image/webp"
+                mime = curl_mime_suffix(f)
                 cmd = [
                     "curl", "-s", "-b", jar, "-X", "POST",
                     f"{ORIGIN}/api/admin/events/{eid}/upload",
@@ -354,23 +388,22 @@ def main() -> int:
             },
         )
 
-        # Brand placeholder logo
-        logo_rel = brand["logo_placeholder"]
-        logo = (BRANDS / demo["brand_id"] / logo_rel).resolve()
-        if not logo.exists():
-            logo = BRANDS / "placeholders" / f"{demo['brand_id']}-logo.png"
-        if logo.exists():
-            subprocess.check_output(
+        # Genuine brand logo (SVG/JPEG) — not placeholders when logos/ present
+        logo = resolve_brand_logo(demo["brand_id"], brand)
+        if logo:
+            lo = subprocess.check_output(
                 [
                     "curl", "-s", "-b", jar, "-X", "POST",
                     f"{ORIGIN}/api/admin/events/{eid}/logo",
                     "-H", f"Origin: {ORIGIN}",
                     "-H", f"Authorization: Bearer {token()}",
-                    "-F", f"logo=@{logo}",
+                    "-F", f"logo=@{logo}{curl_mime_suffix(logo)}",
                 ],
                 text=True,
             )
-            print("  logo ok", logo.name)
+            print("  logo ok", logo.name, lo[:120])
+        else:
+            print("  logo MISSING for", demo["brand_id"])
 
         pub = curl_json(
             "POST",

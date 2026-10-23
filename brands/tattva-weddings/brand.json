@@ -1,14 +1,27 @@
 {
   "id": "tattva-weddings",
   "display_name": "Tattva Weddings",
-  "logo_placeholder": "../placeholders/tattva-weddings-logo.png",
-  "logo_note": "LABELLED PLACEHOLDER — no separate genuine logo file in Project store yet. Do not redraw from chat screenshot. Replace when owner supplies official mark.",
+  "logos": {
+    "dir": "logos/",
+    "client_primary": "logos/Deep_Crimson_primary_logo_copy_d7b7.svg",
+    "client_primary_note": "Deep Crimson primary SVG — preferred for Soft Ivory / light gallery chrome and Soft Ivory password gate.",
+    "client_secondary": "logos/Deep_Crsimson_secondary_logo_copy_66dc.svg",
+    "client_secondary_note": "Deep Crimson secondary SVG (filename typo Deep_Crsimson kept as supplied).",
+    "alt_plum_primary": "logos/Plum_Purple_primary_logo_37c6.svg",
+    "alt_plum_primary_note": "Plum Purple primary SVG — optional for plum-heavy layouts.",
+    "raster_coral_horizontal": "logos/tattva-coral-horizontal.jpg",
+    "raster_plum_horizontal": "logos/tattva-plum-horizontal.jpg",
+    "raster_note": "Rasters kept if a theme slot rejects SVG; prefer SVG.",
+    "legacy_placeholder": "../placeholders/tattva-weddings-logo.png"
+  },
+  "logo_note": "Genuine owner-supplied marks in logos/ — do not redraw or alter. Prefer SVG.",
   "default_style": "wedding-editorial",
   "brand_specs_source": "media/brand-guidelines/mini-momentz-tattva-brand-specs.jpg",
+  "brand_assets_source": "media/brand-assets/tattva/",
   "typography": {
-    "titles": "Bizantheum (NOT shipped — Cormorant Garamond fallback; do not extract from PDF)",
-    "subheadings": "Canela Trial Light (trial license — fallback serif until licensed file supplied)",
-    "body": "Poppins Light (Google Fonts CDN)"
+    "titles": "Bizantheum (NOT shipped — system/Georgia serif fallback; do not extract from PDF)",
+    "subheadings": "Canela Trial Light (trial — fallback serif until licensed file supplied)",
+    "body": "Poppins Light (fallback system-ui; PicPeak sanitizer blocks external font import)"
   },
   "colours": {
     "deep_crimson": "#AB202C",
