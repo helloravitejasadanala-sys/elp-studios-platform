@@ -1,0 +1,35 @@
+# ELP Studios — PicPeak all-in-one (SQLite) demo stack
+# Prefer this over rebuilding a gallery. Official image: picpeak/aio:stable
+# Docs: https://docs.picpeak.app/deployment/single-container
+
+services:
+  picpeak:
+    image: picpeak/aio:stable
+    container_name: elp-picpeak
+    restart: unless-stopped
+    ports:
+      - "${PICPEAK_PORT:-3000}:3000"
+    volumes:
+      - picpeak-data:/data
+    environment:
+      # First-boot admin only (ignored once an admin exists). Change via UI then remove from .env for production.
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@elp.local}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?Set ADMIN_PASSWORD in .env}
+      BRAND_TITLE: ${BRAND_TITLE:-ELP Studios Galleries}
+      BRAND_DESCRIPTION: ${BRAND_DESCRIPTION:-Client photo galleries for Mini Momentz, Katha Films, and Tattva Weddings.}
+      # Direct LAN/demo access — no reverse proxy hop
+      TRUST_PROXY: ${TRUST_PROXY:-0}
+      COOKIE_SECURE: ${COOKIE_SECURE:-auto}
+      # Optional: pin public origin for gallery links (set when behind HTTPS / Tunnel)
+      # FRONTEND_URL: ${FRONTEND_URL:-}
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://127.0.0.1:3000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 45s
+
+volumes:
+  picpeak-data:
+    name: elp-picpeak-data

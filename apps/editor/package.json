@@ -1,0 +1,9 @@
+{
+  "name": "@elp/editor-workspace",
+  "private": true,
+  "version": "0.0.1",
+  "description": "ELP Studios editor workspace demo (Priority 2) — stub",
+  "scripts": {
+    "dev": "echo 'Editor UI not wired yet — see README.md'"
+  }
+}

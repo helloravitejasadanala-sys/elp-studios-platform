@@ -1,0 +1,31 @@
+# Secrets and local env
+.env
+**/.env
+!.env.example
+!**/.env.example
+
+# PicPeak / Docker bind mounts (if used instead of named volumes)
+apps/gallery/data/
+apps/gallery/backup/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.log
+node_modules/
+.venv/
+__pycache__/
+.idea/
+.vscode/
+
+# Test artefacts (keep results markdown; ignore raw downloads)
+apps/gallery/test-results/downloads/
+*.zip
+!demo-media/**
+
+# Editor local storage dumps
+apps/editor/.data/
+
+# Runtime smoke artefacts (may contain tokens)
+apps/gallery/test-results/last-*.json
+apps/gallery/test-results/downloads/
