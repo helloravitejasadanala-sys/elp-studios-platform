@@ -134,3 +134,26 @@ See `apps/editor/README.md`. Local demo UI with roles, assigned projects, deadli
 ## Priority 3 — ELP Studios OS (TrustOS)
 
 `trustos-pilot` remains the TrustOS app. Integration is design-only for now: dashboard can later surface gallery/editor/delivery status via links or APIs. Do not recreate TrustOS here.
+
+
+## Original downloads (critical)
+
+Configure PicPeak so guest downloads are **exact uploaded bytes**:
+
+- `download_standard_resolution=original`
+- `download_allow_original=true`
+- watermarks off (global + per-gallery)
+- `general_use_original_filenames_for_downloads=true`
+
+Prove with: `python3 apps/gallery/scripts/seed-sets-demo.py` → `apps/gallery/test-results/ORIGINAL_INTEGRITY.md` (SHA-256).
+
+Thumbnails/previews are separate display renditions under `/data/storage/thumbnails`.
+
+## Sets (albums)
+
+PicPeak **event categories** with `is_folder: true` are used as Sets. Seed: `scripts/seed-sets-demo.py`.
+
+## Storage adapter (future Synology)
+
+PicPeak already abstracts storage. Later: point media roots at Synology shared folders via documented storage settings — **read masters; never modify/delete the studio archive from the gallery app**. Same-NAS gallery volume is **not** an independent backup; keep a second copy of `/data` (or Synology Hyper Backup / offsite).
+
