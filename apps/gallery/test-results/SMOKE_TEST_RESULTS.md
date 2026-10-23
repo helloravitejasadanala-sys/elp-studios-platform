@@ -1,6 +1,6 @@
 # PicPeak smoke test results
 
-- When (UTC): 2026-10-23T09:54:45Z
+- When (UTC): 2026-10-23T10:55:24Z
 - Origin: `http://127.0.0.1:3000`
 - Image: `picpeak/aio:stable`
 - Pass: **15** / Fail: **0** / Skip: **0**
@@ -11,17 +11,17 @@
 | PASS | Admin login | user=admin |
 | PASS | Admin password change not required | mustChangePassword=false |
 | PASS | Reject bad admin password | HTTP 401 |
-| PASS | Create gallery | id=2 slug=other-smoke-test-gallery-20261023-095444-2026-10-01 |
+| PASS | Create gallery | id=6 slug=other-smoke-test-gallery-20261023-105523-2026-10-01 |
 | PASS | Upload demo photographs | count=4 |
 | PASS | Publish gallery | {"message":"Event published successfully","is_draft":false,"notified_customer":false} |
-| PASS | Client gallery link / info | requires_password=True share=/gallery/other-smoke-test-gallery-20261023-095444-2026-10-01/f120a8658d971b8bbdfb66c1f4895bcc |
+| PASS | Client gallery link / info | requires_password=True share=/gallery/other-smoke-test-gallery-20261023-105523-2026-10-01/2da8b55fea7714c6b2920adb7ad84771 |
 | PASS | Reject wrong gallery password | HTTP 401 |
 | PASS | Password-protected guest login | token issued |
 | PASS | Photos require auth | HTTP 401 |
-| PASS | Guest can list photos | count=2 |
-| PASS | Photo favourites | {"success":true,"id":2,"created":true} |
+| PASS | Guest can list photos | count=4 |
+| PASS | Photo favourites | {"success":true,"id":3,"created":true} |
 | PASS | Single photo download | HTTP 200 bytes=49855 |
-| PASS | Download all (ZIP) | HTTP 200 bytes=42601 |
+| PASS | Download all (ZIP) | HTTP 200 bytes=41455 |
 
 ## Notes
 

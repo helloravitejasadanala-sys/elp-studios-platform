@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Capture desktop + mobile screenshots of running PicPeak demo UI."""
+"""Capture desktop + mobile screenshots of running PicPeak ELP demo."""
 from __future__ import annotations
 
 import json
@@ -11,7 +11,7 @@ from pathlib import Path
 from playwright.sync_api import sync_playwright
 
 ORIGIN = os.environ.get("ORIGIN", "http://127.0.0.1:3000")
-ADMIN_USER = os.environ.get("ADMIN_USERNAME", "admin")
+ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL", "admin@elp.local")
 ADMIN_PASS = os.environ.get("ADMIN_PASSWORD", "ElpStudioDemo2026!")
 GUEST_PASS = os.environ.get("GUEST_PASSWORD", "GuestDemo1")
 OUT = Path(
@@ -22,20 +22,16 @@ OUT = Path(
 )
 OUT.mkdir(parents=True, exist_ok=True)
 
-# Prefer last smoke event; fall back to known demo
-event_path = Path(__file__).resolve().parents[1] / "test-results" / "last-event.json"
-if event_path.exists():
-    event = json.loads(event_path.read_text())
+galleries_path = Path(__file__).resolve().parents[1] / "test-results" / "premium-demo-galleries.json"
+if galleries_path.exists():
+    data = json.loads(galleries_path.read_text())
+    galleries = data["galleries"]
 else:
-    event = {
-        "slug": "other-mini-momentz-demo-family-session-2026-10-01",
-        "share_token": "2b65b077144d09accd626689d3f36b93",
-    }
+    galleries = []
 
-SLUG = event["slug"]
-SHARE = event["share_token"]
-GALLERY_URL = f"{ORIGIN}/gallery/{SLUG}/{SHARE}"
-ADMIN_URL = f"{ORIGIN}/admin"
+# Prefer Mini Momentz for primary client shots; fall back to first
+primary = next((g for g in galleries if g["brand"] == "mini-momentz"), galleries[0] if galleries else None)
+katha = next((g for g in galleries if g["brand"] == "katha-films"), None)
 
 
 def shot(page, name: str) -> Path:
@@ -45,125 +41,150 @@ def shot(page, name: str) -> Path:
     return path
 
 
+def dismiss_dialogs(page):
+    page.keyboard.press("Escape")
+    page.evaluate("() => document.querySelectorAll('dialog[open]').forEach(d => d.close())")
+    time.sleep(0.3)
+
+
+def guest_enter(page, url: str):
+    page.goto(url, wait_until="networkidle", timeout=90000)
+    time.sleep(1.2)
+    gp = page.locator('input[type="password"]').first
+    if gp.count():
+        gp.fill(GUEST_PASS)
+        clicked = False
+        for name in ["View Gallery", "Enter Gallery", "Enter", "Unlock", "Open", "Continue"]:
+            btn = page.get_by_role("button", name=name)
+            if btn.count():
+                btn.first.click()
+                clicked = True
+                break
+        if not clicked:
+            page.locator('button[type="submit"]').first.click()
+        page.wait_for_load_state("networkidle")
+        time.sleep(2.5)
+
+
 def main() -> int:
+    if not primary:
+        print("No galleries found — run seed-premium-demo.py first", file=sys.stderr)
+        return 1
+
+    gallery_url = f"{ORIGIN}{primary['client_path']}"
+    katha_url = f"{ORIGIN}{katha['client_path']}" if katha else None
+
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
 
-        # --- Desktop admin ---
-        desktop = browser.new_context(
-            viewport={"width": 1440, "height": 900},
-            device_scale_factor=1,
-        )
-        page = desktop.new_page()
-        page.goto(ADMIN_URL, wait_until="networkidle", timeout=60000)
+        # Admin desktop
+        ctx = browser.new_context(viewport={"width": 1440, "height": 900})
+        page = ctx.new_page()
+        page.goto(f"{ORIGIN}/admin", wait_until="networkidle", timeout=90000)
         time.sleep(1)
         shot(page, "01-admin-login-desktop.png")
-
-        # Fill login if form present
-        email = page.locator('input[type="email"], input[name="email"], input[autocomplete="username"]').first
-        pwd = page.locator('input[type="password"]').first
-        if email.count() and pwd.count():
-            # PicPeak admin login uses email (ADMIN_EMAIL), not username
-            email.fill(os.environ.get("ADMIN_EMAIL", "admin@elp.local"))
-            pwd.fill(ADMIN_PASS)
-            page.get_by_role("button", name="Sign In").click()
-            page.wait_for_load_state("networkidle")
-            time.sleep(2)
-            page.keyboard.press("Escape")
-            page.evaluate("() => document.querySelectorAll('dialog[open]').forEach(d => d.close())")
-            time.sleep(0.3)
-        shot(page, "02-admin-after-login-desktop.png")
-
-        # Try navigate to events list
-        for sel in [
-            'a[href*="event"]',
-            'text=Events',
-            'text=Galleries',
-            'text=Dashboard',
-        ]:
-            loc = page.locator(sel).first
-            if loc.count():
-                try:
-                    loc.click(timeout=2000)
-                    page.wait_for_load_state("networkidle")
-                    time.sleep(1)
-                    break
-                except Exception:
-                    pass
-        shot(page, "03-admin-events-desktop.png")
-        desktop.close()
-
-        # --- Desktop client gallery (password gate) ---
-        desktop2 = browser.new_context(viewport={"width": 1440, "height": 900})
-        page = desktop2.new_page()
-        page.goto(GALLERY_URL, wait_until="networkidle", timeout=60000)
+        page.locator('input[type="email"]').fill(ADMIN_EMAIL)
+        page.locator('input[type="password"]').fill(ADMIN_PASS)
+        page.get_by_role("button", name="Sign In").click()
+        page.wait_for_url("**/admin/**", timeout=20000)
         time.sleep(1.5)
-        shot(page, "04-client-password-gate-desktop.png")
+        dismiss_dialogs(page)
+        shot(page, "02-admin-dashboard-desktop.png")
+        page.goto(f"{ORIGIN}/admin/events", wait_until="networkidle")
+        time.sleep(1.2)
+        dismiss_dialogs(page)
+        shot(page, "03-admin-events-desktop.png")
+        ctx.close()
 
-        gp = page.locator('input[type="password"]').first
-        if gp.count():
-            gp.fill(GUEST_PASS)
-            page.locator('button[type="submit"], button:has-text("Enter"), button:has-text("View"), button:has-text("Unlock"), button:has-text("Open")').first.click()
-            page.wait_for_load_state("networkidle")
-            time.sleep(2.5)
-        shot(page, "05-client-gallery-desktop.png")
-        desktop2.close()
-
-        # --- Mobile client ---
-        mobile = browser.new_context(
+        # Admin mobile
+        mctx = browser.new_context(
             viewport={"width": 390, "height": 844},
-            device_scale_factor=2,
             is_mobile=True,
             has_touch=True,
+            device_scale_factor=2,
+        )
+        page = mctx.new_page()
+        page.goto(f"{ORIGIN}/admin", wait_until="networkidle", timeout=90000)
+        page.locator('input[type="email"]').fill(ADMIN_EMAIL)
+        page.locator('input[type="password"]').fill(ADMIN_PASS)
+        page.get_by_role("button", name="Sign In").click()
+        page.wait_for_url("**/admin/**", timeout=20000)
+        time.sleep(1.5)
+        dismiss_dialogs(page)
+        page.goto(f"{ORIGIN}/admin/events", wait_until="networkidle")
+        time.sleep(1)
+        dismiss_dialogs(page)
+        shot(page, "08-admin-events-mobile.png")
+        mctx.close()
+
+        # Client desktop — password + gallery (Mini Momentz)
+        ctx = browser.new_context(viewport={"width": 1440, "height": 900})
+        page = ctx.new_page()
+        page.goto(gallery_url, wait_until="networkidle", timeout=90000)
+        time.sleep(1.2)
+        shot(page, "04-client-password-gate-desktop.png")
+        guest_enter(page, gallery_url)
+        shot(page, "05-client-gallery-desktop.png")
+        # Scroll a bit to show grid
+        page.mouse.wheel(0, 600)
+        time.sleep(0.8)
+        shot(page, "05b-client-gallery-grid-desktop.png")
+        ctx.close()
+
+        # Client mobile
+        mctx = browser.new_context(
+            viewport={"width": 390, "height": 844},
+            is_mobile=True,
+            has_touch=True,
+            device_scale_factor=2,
             user_agent=(
                 "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) "
                 "AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 "
                 "Mobile/15E148 Safari/604.1"
             ),
         )
-        page = mobile.new_page()
-        page.goto(GALLERY_URL, wait_until="networkidle", timeout=60000)
-        time.sleep(1.5)
+        page = mctx.new_page()
+        page.goto(gallery_url, wait_until="networkidle", timeout=90000)
+        time.sleep(1)
         shot(page, "06-client-password-gate-mobile.png")
-        gp = page.locator('input[type="password"]').first
-        if gp.count():
-            gp.fill(GUEST_PASS)
-            btn = page.locator('button[type="submit"], button:has-text("Enter"), button:has-text("View"), button:has-text("Unlock"), button:has-text("Open")').first
-            if btn.count():
-                btn.click()
-            else:
-                gp.press("Enter")
-            page.wait_for_load_state("networkidle")
-            time.sleep(2.5)
+        guest_enter(page, gallery_url)
         shot(page, "07-client-gallery-mobile.png")
-        mobile.close()
+        mctx.close()
+
+        # Katha brand client (desktop) if available
+        if katha_url:
+            ctx = browser.new_context(viewport={"width": 1440, "height": 900})
+            page = ctx.new_page()
+            guest_enter(page, katha_url)
+            shot(page, "09-client-katha-films-desktop.png")
+            ctx.close()
 
         browser.close()
 
-    # Manifest
-    files = sorted(OUT.glob("*.png"))
     manifest = OUT / "README.md"
     lines = [
         "# Gallery prototype screenshots",
         "",
         f"Captured against `{ORIGIN}` at `{time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())}`.",
         "",
-        f"Gallery URL used: `{GALLERY_URL}`",
+        f"Primary client gallery: `{gallery_url}` (Mini Momentz demo).",
         "",
         "| File | Description |",
         "| --- | --- |",
-        "| `01-admin-login-desktop.png` | Admin login (desktop 1440×900) |",
-        "| `02-admin-after-login-desktop.png` | Admin after login |",
-        "| `03-admin-events-desktop.png` | Admin events / dashboard area |",
-        "| `04-client-password-gate-desktop.png` | Client password gate (desktop) |",
-        "| `05-client-gallery-desktop.png` | Client gallery grid (desktop) |",
-        "| `06-client-password-gate-mobile.png` | Client password gate (mobile 390×844) |",
-        "| `07-client-gallery-mobile.png` | Client gallery grid (mobile) |",
-        "",
-        "## Files present",
+        "| `01-admin-login-desktop.png` | Admin login |",
+        "| `02-admin-dashboard-desktop.png` | Admin dashboard (multi-brand events) |",
+        "| `03-admin-events-desktop.png` | Events list — Mini Momentz / Katha / Tattva |",
+        "| `04-client-password-gate-desktop.png` | Client password gate |",
+        "| `05-client-gallery-desktop.png` | Client gallery with hero cover |",
+        "| `05b-client-gallery-grid-desktop.png` | Client photo grid |",
+        "| `06-client-password-gate-mobile.png` | Password gate (mobile) |",
+        "| `07-client-gallery-mobile.png` | Client gallery (mobile) |",
+        "| `08-admin-events-mobile.png` | Admin events (mobile) |",
+        "| `09-client-katha-films-desktop.png` | Katha Films branded client view |",
+        "| `SMOKE_TEST_RESULTS.md` | Automated smoke results |",
         "",
     ]
-    for f in files:
+    for f in sorted(OUT.glob("*.png")):
         lines.append(f"- `{f.name}` ({f.stat().st_size} bytes)")
     manifest.write_text("\n".join(lines) + "\n")
     print(f"wrote {manifest}")

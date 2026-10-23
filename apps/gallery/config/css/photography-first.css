@@ -1,0 +1,83 @@
+/*
+ * ELP Studios — Photography-first gallery CSS (PicPeak custom template)
+ * Inspired by public UX patterns (large imagery, minimal chrome, generous space).
+ * Not a copy of any proprietary theme.
+ */
+
+.gallery-page {
+  --gallery-bg: #f7f4ef;
+  --gallery-bg-secondary: #ffffff;
+  --gallery-text: #1c1917;
+  --gallery-text-muted: #78716c;
+  --gallery-accent: #5c4033;
+  --gallery-accent-hover: #3f2a22;
+  --gallery-border: #e7e5e4;
+  --gallery-shadow: 0 1px 0 rgba(28, 25, 23, 0.04);
+  --gallery-radius: 0;
+  --gallery-spacing: 20px;
+  background: var(--gallery-bg);
+  color: var(--gallery-text);
+  font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+}
+
+.gallery-header {
+  background: transparent;
+  border-bottom: none;
+  padding: calc(var(--gallery-spacing) * 1.5) calc(var(--gallery-spacing) * 2);
+}
+
+.gallery-title {
+  font-size: clamp(1.75rem, 4vw, 2.75rem);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+.gallery-subtitle,
+.gallery-meta {
+  color: var(--gallery-text-muted);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 0.95rem;
+  letter-spacing: 0.02em;
+}
+
+.photo-grid {
+  gap: clamp(8px, 1.2vw, 16px);
+  padding: 0 clamp(12px, 3vw, 40px) calc(var(--gallery-spacing) * 3);
+}
+
+.photo-grid img,
+.photo-card img {
+  border-radius: 0;
+}
+
+.photo-card {
+  box-shadow: none;
+  background: transparent;
+}
+
+button,
+.btn,
+.gallery-download-btn {
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  border-radius: 2px;
+  letter-spacing: 0.04em;
+  text-transform: none;
+}
+
+/* Password gate — calm, centered, photography studio feel */
+.gallery-login,
+.password-form {
+  max-width: 420px;
+}
+
+@media (max-width: 640px) {
+  .gallery-header {
+    padding: var(--gallery-spacing);
+  }
+  .photo-grid {
+    gap: 6px;
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+}

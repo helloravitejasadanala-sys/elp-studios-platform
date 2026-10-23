@@ -1,48 +1,53 @@
 # Implemented vs Planned
 
-Last updated: 2026-10-23 (gallery Priority 1 demo).
+Last updated: 2026-10-23 (premium multi-brand PicPeak config pass).
 
-## Gallery (PicPeak) — Implemented (proven in this environment)
+## Legend
 
-| Capability | Status | Evidence |
-| --- | --- | --- |
-| Docker Compose + sample `.env` | **Implemented** | `apps/gallery/docker-compose.yml`, `.env.example` |
-| Persistent volume | **Implemented** | named volume `elp-picpeak-data` |
-| Admin login | **Implemented** | exercised via UI / smoke tests |
-| Create gallery (event) | **Implemented** | demo gallery created in smoke/UI run |
-| Upload demo photographs | **Implemented** | `demo-media/` placeholders uploaded |
-| Client gallery link | **Implemented** | guest URL opened |
-| Password-protected viewing | **Implemented** | guest password required |
-| Photo favourites | **Implemented** | guest favourite toggled |
-| Download | **Implemented** | download / ZIP path exercised |
-| Mobile-responsive UI | **Implemented** | mobile viewport screenshots |
-| Auth/basic security checks | **Implemented** | `apps/gallery/scripts/smoke-test.sh` + results file |
-| Backup/restore notes | **Implemented** | README |
-| Windows-friendly install steps | **Implemented** | README |
-
-## Gallery — Planned / not proven in this demo turn
-
-| Capability | Status | Notes |
-| --- | --- | --- |
-| Per-brand logos/colours (Mini Momentz / Katha / Tattva) | **Planned** | PicPeak supports per-gallery styling; upload brand packs when assets ready |
-| Separate branded client hostnames | **Planned** | Cloudflare Tunnel / DNS; same container |
-| Video upload + preview + download | **Planned** | PicPeak supports MP4; add short demo clip in a follow-up |
-| Gallery expiry / archive | **Planned** | Set short expiry in Admin and verify lockout |
-| HTTPS / Cloudflare Tunnel | **Planned** | Local demo uses HTTP on localhost |
-| Multi-instance (one stack per brand) | **Optional** | Only if single-instance branding is insufficient |
-| NAS / Synology deploy | **Out of scope here** | Owner-run; agents must not touch NAS |
-
-## Editor workspace
-
-| Capability | Status |
+| Tag | Meaning |
 | --- | --- |
-| Login / roles / assigned projects UI | Stub / in progress under `apps/editor` |
-| Deadlines, references, submissions, review | Stub / local adapters |
-| Synology Drive / Tailscale | Interface stubs only — no NAS |
+| **PicPeak native** | Built into `picpeak/aio` — we only configure/use it |
+| **Our config** | Scripts, CSS, brand placeholders, docs in this repo |
+| **Planned** | Not done yet |
 
-## ELP Studios OS (TrustOS)
+## Working now (proven)
 
-| Capability | Status |
+| Capability | How | Evidence |
+| --- | --- | --- |
+| Admin login + dashboard | PicPeak native | Screenshots `01`–`03`, `08` |
+| One admin for 3 brands | PicPeak native (single instance) + **our** seed creates Mini Momentz / Katha / Tattva events | Admin events list |
+| Create gallery (few clicks / API) | PicPeak native + `seed-premium-demo.py` | Seed + smoke |
+| Brand select (per gallery) | PicPeak native per-event logo + **our** placeholder logos | Event logos uploaded |
+| Upload photos | PicPeak native | Demo JPGs |
+| Upload finished videos | PicPeak native after **our** `general_allowed_file_types` includes `mp4` | Katha gallery has MP4 |
+| Cover / hero image | PicPeak native `header_style=hero` + `hero_photo_id` | Client screenshots |
+| Password + downloads | PicPeak native | Smoke 15/15 |
+| Copy client link | PicPeak native share URL | Seed JSON paths |
+| Favourites / comments | PicPeak native feedback (+ ensure `feedback_enabled`) | Smoke favourites |
+| Archive / expire | PicPeak native (extend/archive UI); expiry proven | Extend + expired UI earlier |
+| Client password gate | PicPeak native | `04`, `06` |
+| Full-screen cover + title + date | PicPeak native hero header | `05` |
+| Responsive grid + mobile | PicPeak native + **our** photography-first CSS | `07` |
+| Download individual + all | PicPeak native | Smoke downloads |
+| Video in gallery | PicPeak native (after MIME allow) | Katha event media_type=video |
+| Auth / hashed passwords / private galleries | PicPeak native — **not weakened** | Smoke auth negatives |
+| Docker Compose + Windows README | **Our config** | `apps/gallery/` |
+| Brand placeholder logos | **Our config** | `brands/placeholders/` (labelled) |
+| Photography-first CSS template | **Our config** | `apps/gallery/config/css/photography-first.css` |
+
+## Unfinished / planned
+
+| Item | Notes |
 | --- | --- |
-| Recreate TrustOS | **Will not do** — leave `trustos-pilot` intact |
-| Integration points (status on dashboard) | **Planned** after gallery + editor demos |
+| Real brand logos & exact brand colours | Placeholders only until owner supplies assets |
+| Branded client hostnames (Tunnel) | Planned — Cloudflare Tunnel |
+| HTTPS for public clients | Planned |
+| Family sharing polish beyond PicPeak share | PicPeak share links exist; no custom share app |
+| Selection-submit workflow UX polish | Favourites/comments work; dedicated “submit selection” packaging planned |
+| Editor workspace UI | Stub only (`apps/editor`) |
+| TrustOS / ELP OS dashboard integration | Design later — do not recreate TrustOS |
+| GitHub push from this agent | Blocked: `cursor[bot]` 403 on `elp-studios-platform` until Cursor GitHub App repo access includes it |
+
+## UX research (public pages only)
+
+Patterns used as inspiration (not copied assets/code): Pixieset / Pic-Time / ShootProof public marketing — photography-first covers, minimal chrome, favourites proofing, password delivery, mobile ease, video alongside photos. No e-commerce/payments/CRM in our scope.
