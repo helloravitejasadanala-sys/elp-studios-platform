@@ -1,0 +1,25 @@
+{
+  "id": "cinematic-event",
+  "name": "Cinematic Event",
+  "description": "Katha Films — warm paper, ink type, restrained gold accent. Photography-first; not a fake brand identity.",
+  "intended_brands": ["katha-films"],
+  "typography": {
+    "title": {
+      "intended": "Owner-supplied when licensed",
+      "fallback": "Georgia, 'Times New Roman', serif"
+    },
+    "body": {
+      "intended": "Owner-supplied when licensed",
+      "fallback": "system-ui, Segoe UI, Helvetica Neue, sans-serif"
+    }
+  },
+  "colours": {
+    "gold": "#C49A6C",
+    "ink": "#1C1917",
+    "warm_paper": "#F7F4EF",
+    "note": "Gold accent from the existing Katha demo config (#c49a6c). No invented logo."
+  },
+  "css_file": "gallery.css",
+  "picpeak_css_slot": 3,
+  "picpeak_template_name": "ELP Style C — Cinematic Event (Katha)"
+}

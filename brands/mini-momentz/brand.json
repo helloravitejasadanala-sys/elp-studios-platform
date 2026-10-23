@@ -26,6 +26,11 @@
     "charcoal": "#696969"
   },
   "ui_note": "Warm light gallery; teal/terracotta/mustard as restrained accents; photos dominate.",
+  "event_categories": ["maternity", "newborn", "baby-shower", "birthday", "other"],
+  "client_welcome": "Your Mini Momentz gallery is ready. Tap a heart to favourite, and download originals anytime.",
+  "whatsapp_share_template": "Your photographs are ready! We've put together your gallery so you can relive all those beautiful moments.\n\nView your gallery: {link}\n\nMini Momentz",
+  "email_subject": "Your Mini Momentz gallery is ready",
+  "email_signature": "With love,\nMini Momentz",
   "demo_event": {
     "client_name": "Divya & Ravi",
     "gallery_name": "Seemantham",

@@ -239,6 +239,12 @@
   border-radius: 2px;
 }
 
+.gallery-page video {
+  width: 100%;
+  max-height: 80vh;
+  background: #111;
+}
+
 .gallery-page :focus-visible {
   outline: 2px solid #8ccac6;
   outline-offset: 2px;

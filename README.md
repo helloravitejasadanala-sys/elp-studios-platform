@@ -10,8 +10,11 @@ Brands (client-facing identity per gallery): **Mini Momentz**, **Katha Films**, 
 | Path | Purpose |
 | --- | --- |
 | `apps/gallery/` | PicPeak Docker Compose + sample env + smoke tests |
-| `apps/editor/` | Editor workspace (demo UI; Priority 2) |
+| `apps/studio-console/` | ELP tabbed create / brands / WhatsApp companion (does not store media) |
+| `apps/editor/` | Editor workspace (demo UI; later) |
 | `demo-media/` | Royalty-free / generated placeholder photos for demos |
+| `docs/phase2-windows.md` | Safe Windows commands to apply Phase 2 without losing galleries |
+| `docs/storage.md` | Where photos live; why capacity looks huge |
 | `IMPLEMENTED.md` | Done vs planned checklist |
 
 **Hard rules:** no Synology NAS access from agents; demo media only; no real client PII or hardcoded production secrets (use `.env` from `.env.example`).
@@ -74,7 +77,23 @@ Docs: [Single-container install](https://docs.picpeak.app/deployment/single-cont
    docker compose down
    ```
 
-   Data stays in the Docker volume `elp-picpeak-data` until you remove the volume.
+   Data stays in the Docker volume `elp-picpeak-data`. **Never run `docker compose down -v`** — that deletes uploaded galleries.
+
+### Phase 2 — video, optional email, WhatsApp, tabbed create
+
+PicPeak already supports video. The upload popup stays photo-only until **Allowed File Types** includes `mp4,mov,webm` (default is jpg/jpeg/png/webp). Apply this to an **existing** install without deleting galleries:
+
+```powershell
+cd apps\gallery
+python scripts\apply-platform-settings.py --dry-run
+python scripts\apply-platform-settings.py
+docker compose up -d studio-console
+```
+
+- PicPeak Admin: http://localhost:3000/admin  
+- ELP Studio Console (brands, tabs, Copy link, WhatsApp): http://localhost:3080  
+
+Full Windows steps: `docs/phase2-windows.md`. Storage: `docs/storage.md`. Synology is **not** connected — plan only in `docs/synology-deployment-plan.md`.
 
 **HTTPS preview:** not enabled in this demo (`COOKIE_SECURE=auto`, no Tunnel). For HTTPS later, set `FRONTEND_URL` + Cloudflare Tunnel (or similar) and `TRUST_PROXY=1` — see Planned items in `IMPLEMENTED.md`.
 

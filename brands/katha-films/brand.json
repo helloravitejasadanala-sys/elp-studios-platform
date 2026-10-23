@@ -1,0 +1,33 @@
+{
+  "id": "katha-films",
+  "display_name": "Katha Films",
+  "logos": {
+    "dir": "logos/",
+    "client_primary": "../placeholders/katha-films-logo.png",
+    "client_primary_note": "No genuine Katha Films logo in the repo yet — labelled placeholder only. Do not invent a mark.",
+    "legacy_placeholder": "../placeholders/katha-films-logo.png"
+  },
+  "logo_note": "Placeholder until the owner supplies a genuine Katha Films logo. Do not redraw or generate a replacement.",
+  "default_style": "cinematic-event",
+  "typography": {
+    "body_headings": "System geometric / serif fallback until licensed files are supplied"
+  },
+  "colours": {
+    "gold": "#c49a6c",
+    "ink": "#1c1917",
+    "warm_paper": "#f7f4ef"
+  },
+  "ui_note": "Cinematic, photography-first; gold as a restrained accent. Uses the existing placeholder logo only.",
+  "event_categories": ["cultural-event", "corporate", "other"],
+  "client_welcome": "Your Katha Films gallery is ready — photographs and films in one place.",
+  "whatsapp_share_template": "Your photographs are ready! We've put together your gallery so you can relive all those beautiful moments.\n\nView your gallery: {link}\n\nKatha Films",
+  "email_subject": "Your Katha Films gallery is ready",
+  "email_signature": "Katha Films",
+  "demo_event": {
+    "client_name": "Demo Client",
+    "gallery_name": "Highlight Film",
+    "event_date": "2026-10-10",
+    "welcome": "Your Katha Films delivery — photos and finished film in one place.",
+    "sets": ["Portraits", "Highlights Film"]
+  }
+}

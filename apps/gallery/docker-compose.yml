@@ -30,6 +30,35 @@ services:
       retries: 10
       start_period: 45s
 
+  # Optional Studio Console (tabbed create, brands, WhatsApp).
+  # Does not replace PicPeak. Does not mount or rewrite elp-picpeak-data.
+  # Start only this service: docker compose up -d studio-console
+  studio-console:
+    image: python:3.12-alpine
+    container_name: elp-studio-console
+    restart: unless-stopped
+    working_dir: /app
+    command: ["python", "server.py"]
+    ports:
+      - "${STUDIO_PORT:-3080}:3080"
+    volumes:
+      - ../../apps/studio-console:/app:ro
+      - ../../brands:/brands:ro
+      - ../../styles:/styles:ro
+      - ../../apps/gallery:/gallery:ro
+    environment:
+      STUDIO_BIND: 0.0.0.0
+      STUDIO_PORT: 3080
+      PICPEAK_ORIGIN: http://picpeak:3000
+      PICPEAK_PUBLIC_ORIGIN: ${PICPEAK_PUBLIC_ORIGIN:-http://localhost:3000}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@elp.local}
+      ELP_BRANDS_DIR: /brands
+      ELP_STYLES_DIR: /styles
+      PYTHONPATH: /gallery
+      PYTHONDONTWRITEBYTECODE: "1"
+    depends_on:
+      - picpeak
+
 volumes:
   picpeak-data:
     name: elp-picpeak-data

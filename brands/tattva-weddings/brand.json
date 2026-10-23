@@ -31,6 +31,11 @@
     "soft_ivory": "#F8F6F3"
   },
   "ui_note": "Soft Ivory backgrounds; elegant editorial type; subtle Deep Crimson accents. NOT generic gold/bronze wedding theme.",
+  "event_categories": ["wedding", "engagement", "other"],
+  "client_welcome": "Your Tattva Weddings gallery is ready. Favourites and original downloads are available whenever you need them.",
+  "whatsapp_share_template": "Your photographs are ready! We've put together your gallery so you can relive all those beautiful moments.\n\nView your gallery: {link}\n\nTattva Weddings",
+  "email_subject": "Your Tattva Weddings gallery is ready",
+  "email_signature": "With love,\nTattva Weddings",
   "demo_event": {
     "client_name": "Ananya & Rohan",
     "gallery_name": "Wedding Day",

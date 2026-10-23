@@ -1,66 +1,51 @@
 # Implemented vs Planned
 
-Last updated: 2026-10-23 (Style A/B + owner brand specs applied).
+Last updated: 2026-10-23 (Phase 2 — video settings, Studio Console, WhatsApp, optional email).
 
 ## Legend
 
 | Tag | Meaning |
 | --- | --- |
 | **PicPeak native** | Built into `picpeak/aio` — we only configure/use it |
-| **Our config** | Scripts, CSS, brand placeholders, docs in this repo |
+| **Our config** | Scripts, CSS, brand files, Studio Console in this repo |
 | **Planned** | Not done yet |
 
-## Working now (proven)
+## Working now
 
 | Capability | How | Evidence |
 | --- | --- | --- |
-| Admin login + dashboard | PicPeak native | Screenshots |
-| **Style A — Wedding Editorial** | `styles/wedding-editorial/` → PicPeak CSS slot 1 | Tattva demo + screenshots `20-tattva-editorial-*` |
-| **Style B — Modern Story** | `styles/modern-story/` → PicPeak CSS slot 2 | Mini Momentz demo + screenshots `21-mini-modern-*` |
-| Owner brand colours (config) | Tattva Soft Ivory/Deep Crimson/Plum; Mini Teal/Terracotta/… | `brands/*/brand.json`, `styles/*/style.json` |
-| Brand → Client → Gallery (convention) | Event naming + customer fields + per-event logo | Seed scripts |
-| Unlimited Sets | PicPeak `photo_categories` `is_folder=true` | Both style demos |
-| Upload into sets | Upload with `category_id` | Seed + integrity |
-| Cover / password / expiry / publish / link | PicPeak native | Seed |
-| Favourites / comments | PicPeak feedback | Prior smoke |
-| Video in a set | PicPeak + MIME allow-list + curl `type=video/mp4` | Reception Film / Highlights Film |
-| **Exact original downloads** | `download_standard_resolution=original`, watermarks off | **`STYLES_ORIGINAL_INTEGRITY.md` — 12/12 SHA-256 PASS** |
-| Download-all ZIP | Guest API | Both galleries PASS |
-| Original filenames on download | Setting enabled | Configured |
-| Client one-link all sets | Share URL; folders in gallery UI | Screenshots |
-| Docker Compose + Windows README | **Our config** | `apps/gallery/` |
-| Brand/style config (no app rebuild) | **Our config** | `brands/`, `styles/` |
-| Capability matrix | **Our docs** | `GAPS.md` |
+| Admin login + dashboard | PicPeak native | Existing local install |
+| **Video uploads** | PicPeak native once `general_allowed_file_types` includes `mp4,mov,webm` | Official [Video Support](https://docs.picpeak.app/features/video-support) docs; prior demo SHA-256 of `katha-demo-clip.mp4`; `apply-platform-settings.py` |
+| Mixed photo + video galleries | Native player + FFmpeg poster frames | PicPeak docs; CSS `video` rules in styles |
+| Original downloads | `download_standard_resolution=original`, watermarks off | `STYLES_ORIGINAL_INTEGRITY.md` 12/12 |
+| Optional client email | `event_require_customer_email=false`; create payload omits empty email | `elp_lib.event_create_payload` tests |
+| WhatsApp + copy link | Studio Console | `apps/studio-console/` |
+| Tabbed event create | Studio Console (PicPeak long form unchanged) | Console wizard |
+| Three brands | `brands/*/brand.json` + per-event logo/CSS | Mini/Tattva genuine logos; Katha placeholder |
+| Style A/B/C CSS templates | PicPeak CSS slots 1–3 | `styles/` |
+| Named volume persistence | `elp-picpeak-data` | Compose file; `docs/storage.md` |
 
-## Font / logo status (owner specs 2026-10-23)
+## Font / logo status
 
 | Asset | Status |
 | --- | --- |
-| Mini Momentz colours | **Applied** from brand specs image |
-| Tattva colours | **Applied** (crimson/plum/ivory — not gold/bronze) |
-| Futura Now / Peach Blossom | **Not shipped** — documented geometric fallbacks; Peach Blossom skipped |
-| Bizantheum / Canela Trial | **Not shipped** — no PDF extraction; Georgia/system serif fallback |
-| Poppins Light | Prefer when self-hosted; PicPeak CSS sanitizer blocks external font `@import` |
-| Official logos | **Wired** — owner SVG/JPEG in `brands/*/logos/` (Tattva Deep Crimson primary SVG; Mini colour JPG; ELP admin JPG). Mini has no transparent master — hero uses CSS multiply blend (artwork unchanged). |
-| Hero title contrast (Tattva) | **Fixed** — Soft Ivory `#F8F6F3` on dark covers (was plum-on-plum from over-broad `h1` colour rule) |
-| Licensed brand fonts | **Still fallbacks** — Futura Now / Bizantheum / Canela / Peach Blossom / Poppins not embedded until owner supplies licensed files |
+| Mini Momentz / Tattva genuine logos | Wired in `brands/*/logos/` |
+| Katha Films logo | **Placeholder only** — no genuine file in repo |
+| Licensed brand fonts | Fallbacks only |
 
 ## Unfinished / planned
 
 | Item | Notes |
 | --- | --- |
-| Licensed brand fonts embedded | Owner must supply files; sanitizer-safe delivery path |
-| Real brand logos | Placeholders until owner assets |
-| First-class Brand entity (vs naming convention) | Optional thin wrapper — see `GAPS.md` |
-| Admin “Select Brand → Style” guided wizard | Convention + seed today; dedicated UI polish planned |
-| Per-set one-click ZIP UX polish | Selected/download-all native |
-| Synology storage adapter (read masters) | Interface/docs only — no NAS now |
+| Native PicPeak create form as tabs | Not customisable without forking PicPeak; use Studio Console |
+| Guest-facing Photos/Videos tabs | Admin Media tab + Studio Console filters. PicPeak guest gallery plays mixed media; type tabs on the **client** gallery are not a stable public API |
+| Browser-playable video copies / HLS | Beta PicPeak only — off on `aio:stable` so originals are not recompressed |
+| Genuine Katha logo | Owner must supply |
+| Licensed fonts | Owner must supply; sanitizer blocks `@import` |
+| Synology hosting | Plan only — `docs/synology-deployment-plan.md` |
 | Independent backup automation | Documented; owner Hyper Backup / offsite |
-| Branded hostnames + HTTPS / Tunnel | Cloudflare Tunnel planned |
-| Editor workspace UI | Stub |
-| TrustOS integration | Later |
-| Katha Films dual-style demos | Config ready; not seeded this pass |
+| Editor workspace / TrustOS | Out of scope here |
 
 ## Not production-ready
 
-Demo credentials, placeholder logos/fonts, no Tunnel/HTTPS, no Synology, no real client media. Use for local / Dell Docker Desktop demos only.
+Demo credentials, Katha placeholder logo, font fallbacks, no Tunnel/HTTPS, no NAS. Use locally until NAS health is verified.

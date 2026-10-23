@@ -6,6 +6,7 @@ Two visual **styles**, separate from brand identity and from PicPeak app logic.
 | --- | --- | --- | --- |
 | **Wedding Editorial** | `wedding-editorial` | Tattva Weddings | Soft Ivory `#F8F6F3`, Deep Crimson `#AB202C`, Plum `#461345`, … |
 | **Modern Story** | `modern-story` | Mini Momentz | Teal `#8CCAC6`, Dark Teal `#578884`, Terracotta `#D36727`, … |
+| **Cinematic Event** | `cinematic-event` | Katha Films | Warm paper, ink, gold `#C49A6C` (existing Katha accent; placeholder logo) |
 
 Brand specs image (Project store): `media/brand-guidelines/mini-momentz-tattva-brand-specs.jpg`
 
