@@ -35,8 +35,18 @@ STABLE_ADMIN_USER = {
 
 
 class H(BaseHTTPRequestHandler):
+    seen = []
+
     def log_message(self, *args):
         return
+
+    def _record(self):
+        path = urlparse(self.path).path
+        H.seen.append((self.command, path))
+        if "/api/api" in path:
+            self._json(404, {"error": "duplicated /api in path", "path": path})
+            return True
+        return False
 
     def _json(self, code, obj, extra_headers=None):
         raw = json.dumps(obj).encode()
@@ -77,11 +87,13 @@ class H(BaseHTTPRequestHandler):
         self.end_headers()
 
     def do_GET(self):
+        if self._record():
+            return
         path = urlparse(self.path).path
         if path == "/health":
             self._json(200, {"status": "ok", "mock": True})
             return
-        if path.endswith("/api/auth/session"):
+        if path == "/api/auth/session":
             token = self._admin_token()
             if not token:
                 self._json(401, {"error": "No token provided"})
@@ -101,7 +113,7 @@ class H(BaseHTTPRequestHandler):
                 },
             )
             return
-        if path.endswith("/api/admin/css-templates"):
+        if path == "/api/admin/css-templates":
             self._json(
                 200,
                 {
@@ -113,7 +125,7 @@ class H(BaseHTTPRequestHandler):
                 },
             )
             return
-        if path.endswith("/api/admin/settings/storage/info"):
+        if path == "/api/admin/settings/storage/info":
             self._json(
                 200,
                 {
@@ -131,7 +143,7 @@ class H(BaseHTTPRequestHandler):
                 },
             )
             return
-        if path.endswith("/api/admin/settings"):
+        if path == "/api/admin/settings":
             self._json(
                 200,
                 {
@@ -142,7 +154,7 @@ class H(BaseHTTPRequestHandler):
                 },
             )
             return
-        if path.endswith("/api/admin/backup/config") or path.endswith("/api/admin/backup/status"):
+        if path in ("/api/admin/backup/config", "/api/admin/backup/status"):
             self._json(200, {"backup_enabled": False, "backup_destination_type": None})
             return
         if path.startswith("/api/admin/events"):
@@ -162,9 +174,11 @@ class H(BaseHTTPRequestHandler):
         self._json(404, {"error": path})
 
     def do_POST(self):
+        if self._record():
+            return
         path = urlparse(self.path).path
         body = self._body()
-        if path.endswith("/api/auth/admin/login"):
+        if path == "/api/auth/admin/login":
             username = (body.get("username") or "").strip()
             password = body.get("password") or ""
             if not username or not password:
@@ -185,7 +199,7 @@ class H(BaseHTTPRequestHandler):
                 ],
             )
             return
-        if path.endswith("/api/auth/logout"):
+        if path == "/api/auth/logout":
             self._json(
                 200,
                 {"success": True},
@@ -197,7 +211,7 @@ class H(BaseHTTPRequestHandler):
                 ],
             )
             return
-        if path.endswith("/api/admin/events"):
+        if path == "/api/admin/events":
             if "customer_email" in body and body["customer_email"] in ("", None):
                 self._json(400, {"error": "empty email should have been omitted"})
                 return

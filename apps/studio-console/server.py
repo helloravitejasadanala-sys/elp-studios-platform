@@ -28,12 +28,15 @@ from elp_lib import (  # noqa: E402
     BACKUP_POLICY,
     BRANDS_DIR,
     COST_CATEGORIES,
+    PICPEAK_PROXY_PREFIX,
     STORAGE_ALERT_THRESHOLDS,
     STORAGE_VOLUME_NAME,
     TECHNICAL_LIMITS,
     build_storage_report,
+    join_picpeak_url,
     load_brands,
     load_dotenv,
+    normalize_picpeak_origin,
     rewrite_picpeak_cookie_for_proxy,
     set_cookie_values,
 )
@@ -42,16 +45,21 @@ load_dotenv(GALLERY / ".env")
 
 LISTEN_HOST = os.environ.get("STUDIO_BIND", "0.0.0.0")
 LISTEN_PORT = int(os.environ.get("STUDIO_PORT", "3080"))
-PICPEAK_ORIGIN = os.environ.get("PICPEAK_ORIGIN", "http://127.0.0.1:3000").rstrip("/")
+# Keep the raw env value so join_picpeak_url can strip a mistaken trailing /api.
+PICPEAK_ORIGIN = os.environ.get("PICPEAK_ORIGIN", "http://127.0.0.1:3000")
 PICPEAK_PUBLIC_ORIGIN = os.environ.get("PICPEAK_PUBLIC_ORIGIN", "http://localhost:3000").rstrip("/")
 ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL", "admin@elp.local")
+
+
+def _picpeak_host() -> str:
+    return normalize_picpeak_origin(PICPEAK_ORIGIN)
 
 
 def _config() -> dict:
     return {
         "picpeakPublicOrigin": PICPEAK_PUBLIC_ORIGIN,
         "adminEmailDefault": ADMIN_EMAIL,
-        "proxyPrefix": "/pp",
+        "proxyPrefix": PICPEAK_PROXY_PREFIX,
         "brands": load_brands(),
         "layouts": [
             {"id": "grid", "label": "Grid"},
@@ -124,7 +132,7 @@ class Handler(BaseHTTPRequestHandler):
         if path.startswith("/brand-assets/"):
             self._brand_asset(path[len("/brand-assets/") :])
             return
-        if path.startswith("/pp/"):
+        if path == PICPEAK_PROXY_PREFIX or path.startswith(PICPEAK_PROXY_PREFIX + "/"):
             self._proxy(parsed)
             return
         rel = path.lstrip("/")
@@ -180,8 +188,8 @@ class Handler(BaseHTTPRequestHandler):
         self._send(200, target.read_bytes(), ctype)
 
     def _picpeak_json(self, path: str, timeout: int = 45) -> tuple[int, object]:
-        dest = PICPEAK_ORIGIN + path
-        headers = {"Accept": "application/json", "Origin": PICPEAK_ORIGIN}
+        dest = join_picpeak_url(PICPEAK_ORIGIN, path)
+        headers = {"Accept": "application/json", "Origin": _picpeak_host()}
         auth = self.headers.get("Authorization")
         if auth:
             headers["Authorization"] = auth
@@ -201,7 +209,7 @@ class Handler(BaseHTTPRequestHandler):
                 parsed = {"error": raw or str(exc)}
             return exc.code, parsed
         except URLError as exc:
-            return 502, {"error": str(exc.reason), "origin": PICPEAK_ORIGIN}
+            return 502, {"error": str(exc.reason), "origin": _picpeak_host()}
 
     def _storage_report(self) -> None:
         if not (self.headers.get("Authorization") or self.headers.get("Cookie")):
@@ -257,13 +265,15 @@ class Handler(BaseHTTPRequestHandler):
         return extra
 
     def _proxy(self, parsed) -> None:
-        if not parsed.path.startswith("/pp/"):
+        if parsed.path != PICPEAK_PROXY_PREFIX and not parsed.path.startswith(PICPEAK_PROXY_PREFIX + "/"):
             self._send_json(404, {"error": "Not a PicPeak proxy path"})
             return
-        dest_path = parsed.path[len("/pp") :] or "/"
-        dest = PICPEAK_ORIGIN + dest_path
-        if parsed.query:
-            dest += "?" + parsed.query
+        dest = join_picpeak_url(PICPEAK_ORIGIN, parsed.path, parsed.query)
+        dest_path = urlparse(dest).path
+        if "/api/api" in dest_path:
+            self._send_json(500, {"error": "Refusing duplicated /api path", "path": dest_path})
+            return
+        sys.stderr.write("%s - picpeak %s %s\n" % (self.address_string(), self.command, dest_path))
         length = int(self.headers.get("Content-Length") or 0)
         body = self.rfile.read(length) if length else None
         headers = {}
@@ -271,7 +281,7 @@ class Handler(BaseHTTPRequestHandler):
             val = self.headers.get(key)
             if val:
                 headers[key] = val
-        headers["Origin"] = PICPEAK_ORIGIN
+        headers["Origin"] = _picpeak_host()
         req = Request(dest, data=body, headers=headers, method=self.command)
         try:
             with urlopen(req, timeout=120) as resp:
@@ -290,7 +300,7 @@ class Handler(BaseHTTPRequestHandler):
                 {
                     "error": "PicPeak is not reachable from the Studio Console.",
                     "detail": str(exc.reason),
-                    "origin": PICPEAK_ORIGIN,
+                    "origin": _picpeak_host(),
                 },
             )
 
@@ -301,7 +311,7 @@ def main() -> int:
         return 1
     httpd = ThreadingHTTPServer((LISTEN_HOST, LISTEN_PORT), Handler)
     print(f"ELP Studio Console  http://127.0.0.1:{LISTEN_PORT}")
-    print(f"PicPeak proxy       {PICPEAK_ORIGIN}")
+    print(f"PicPeak proxy       {_picpeak_host()}")
     print("Does not store galleries. Stop with Ctrl+C.")
     httpd.serve_forever()
     return 0

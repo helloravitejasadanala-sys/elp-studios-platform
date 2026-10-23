@@ -13,10 +13,12 @@ It does **not** replace PicPeak, store photos, or touch the `elp-picpeak-data` v
 From `apps/gallery`, with Docker already running PicPeak:
 
 ```powershell
-docker compose up -d studio-console
+docker compose up -d --no-deps --force-recreate studio-console
 ```
 
-Do **not** use `docker compose down -v`.
+`--no-deps` leaves the `picpeak` container and `elp-picpeak-data` volume untouched. Do **not** use `docker compose down -v`.
+
+The console proxies PicPeak at **one** `/api` prefix (`POST /api/auth/admin/login`, `GET /api/auth/session`, `POST /api/auth/logout`). If PicPeak logs `HTTP 429` after earlier bad `/api/api/...` attempts, wait for that limit to lift and try sign-in **once**.
 
 Then apply video + optional-email settings (does not delete galleries):
 

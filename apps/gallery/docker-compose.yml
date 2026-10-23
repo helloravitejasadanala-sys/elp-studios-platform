@@ -51,6 +51,7 @@ services:
     environment:
       STUDIO_BIND: 0.0.0.0
       STUDIO_PORT: 3080
+      # Host only. Do not append /api — login is POST /api/auth/admin/login.
       PICPEAK_ORIGIN: http://picpeak:3000
       PICPEAK_PUBLIC_ORIGIN: ${PICPEAK_PUBLIC_ORIGIN:-http://localhost:3000}
       ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@elp.local}

@@ -81,6 +81,38 @@ function waUrl(message, phone) {
   return `${base}?text=${encodeURIComponent(message)}`;
 }
 
+function picpeakProxyUrl(path) {
+  const prefix = (state.config && state.config.proxyPrefix) || "/pp";
+  let raw = String(path == null ? "/" : path);
+  let query = "";
+  const q = raw.indexOf("?");
+  if (q >= 0) {
+    query = raw.slice(q);
+    raw = raw.slice(0, q);
+  }
+  let p = raw || "/";
+  const cut = prefix.endsWith("/") ? prefix.slice(0, -1) : prefix;
+  while (p === cut || p.startsWith(cut + "/")) {
+    p = p.slice(cut.length) || "/";
+  }
+  if (!p.startsWith("/")) p = "/" + p;
+  while (p.includes("//")) p = p.replaceAll("//", "/");
+  while (p.startsWith("/api/api")) p = "/api" + p.slice("/api/api".length);
+  while (p.includes("/api/api")) p = p.replaceAll("/api/api", "/api");
+  return cut + p + query;
+}
+
+function describeApiError(err) {
+  if (err && err.status === 429) {
+    return (
+      "PicPeak is temporarily blocking sign-in (HTTP 429) after too many failed requests. " +
+      "Wait until the limit lifts, then try once — do not keep clicking Continue. " +
+      "The same username and password still work in PicPeak Admin at http://localhost:3000/admin once the wait is over."
+    );
+  }
+  return (err && err.message) || "Request failed";
+}
+
 async function api(path, opts = {}) {
   const headers = { ...(opts.headers || {}) };
   if (state.token) headers.Authorization = `Bearer ${state.token}`;
@@ -88,7 +120,7 @@ async function api(path, opts = {}) {
     headers["Content-Type"] = "application/json";
     opts.body = JSON.stringify(opts.json);
   }
-  const res = await fetch("/pp" + path, { ...opts, headers, credentials: "include" });
+  const res = await fetch(picpeakProxyUrl(path), { ...opts, headers, credentials: "include" });
   const text = await res.text();
   let data = {};
   try {
@@ -205,7 +237,7 @@ function renderLogin() {
       await loadEvents();
       render();
     } catch (err) {
-      $("#login-error").textContent = err.message;
+      $("#login-error").textContent = describeApiError(err);
     }
   };
 }
@@ -751,7 +783,7 @@ function simpleUpload(eventId, file, bar) {
     const fd = new FormData();
     fd.append("photos", file, file.name);
     const xhr = new XMLHttpRequest();
-    xhr.open("POST", `/pp/api/admin/events/${eventId}/upload`);
+    xhr.open("POST", picpeakProxyUrl(`/api/admin/events/${eventId}/upload`));
     xhr.withCredentials = true;
     if (state.token) xhr.setRequestHeader("Authorization", "Bearer " + state.token);
     xhr.upload.onprogress = (e) => {
@@ -780,7 +812,7 @@ async function chunkedUpload(eventId, file, bar) {
     const blob = file.slice(i * size, Math.min(file.size, (i + 1) * size));
     const chunkHeaders = { "Content-Type": "application/octet-stream" };
     if (state.token) chunkHeaders.Authorization = "Bearer " + state.token;
-    const res = await fetch(`/pp/api/admin/photos/${eventId}/chunked-upload/${uploadId}/chunk/${i}`, {
+    const res = await fetch(picpeakProxyUrl(`/api/admin/photos/${eventId}/chunked-upload/${uploadId}/chunk/${i}`), {
       method: "POST",
       credentials: "include",
       headers: chunkHeaders,
