@@ -41,7 +41,8 @@ Last updated: 2026-10-23 (Style A/B + owner brand specs applied).
 | Futura Now / Peach Blossom | **Not shipped** — documented geometric fallbacks; Peach Blossom skipped |
 | Bizantheum / Canela Trial | **Not shipped** — no PDF extraction; Georgia/system serif fallback |
 | Poppins Light | Prefer when self-hosted; PicPeak CSS sanitizer blocks external font `@import` |
-| Official logos | **Wired** — owner SVG/JPEG in `brands/*/logos/` (Tattva Deep Crimson primary SVG; Mini colour JPG; ELP admin JPG). Light Mini logo reserved for dark covers. |
+| Official logos | **Wired** — owner SVG/JPEG in `brands/*/logos/` (Tattva Deep Crimson primary SVG; Mini colour JPG; ELP admin JPG). Mini has no transparent master — hero uses CSS multiply blend (artwork unchanged). |
+| Hero title contrast (Tattva) | **Fixed** — Soft Ivory `#F8F6F3` on dark covers (was plum-on-plum from over-broad `h1` colour rule) |
 | Licensed brand fonts | **Still fallbacks** — Futura Now / Bizantheum / Canela / Peach Blossom / Poppins not embedded until owner supplies licensed files |
 
 ## Unfinished / planned

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Capture desktop + mobile screenshots for Style A (Tattva) and Style B (Mini Momentz).
 
-Default prefix `22` (genuine logos). Override with SHOT_PREFIX=20 to refresh older series.
-Does not overwrite 01–13 proof shots.
+Default prefix via SHOT_PREFIX (e.g. 23). Does not overwrite 01–13 proof shots.
+Emphasises full gallery page + photo viewing for both styles.
 """
 from __future__ import annotations
 
@@ -18,7 +18,7 @@ ORIGIN = os.environ.get("ORIGIN", "http://127.0.0.1:3000")
 ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL", "admin@elp.local")
 ADMIN_PASS = os.environ.get("ADMIN_PASSWORD", "ElpStudioDemo2026!")
 GUEST_PASS = os.environ.get("GUEST_PASSWORD", "GuestDemo1")
-PREFIX = os.environ.get("SHOT_PREFIX", "22")
+PREFIX = os.environ.get("SHOT_PREFIX", "23")
 OUT = Path(
     os.environ.get(
         "SCREENSHOT_DIR",
@@ -75,37 +75,52 @@ def guest_enter(page, url: str):
         time.sleep(2.5)
 
 
-def capture_brand(browser, g: dict, prefix: str):
+def open_photo_view(page) -> bool:
+    """Open a set then a photo for fullscreen/lightbox view."""
+    folders = page.locator("button.group")
+    if folders.count():
+        try:
+            folders.first.click(timeout=3000)
+            page.wait_for_load_state("networkidle")
+            time.sleep(1.5)
+        except Exception:
+            pass
+    cards = page.locator(".photo-card")
+    if cards.count():
+        try:
+            cards.first.click(timeout=3000)
+            time.sleep(1.8)
+            return True
+        except Exception:
+            pass
+    return False
+
+
+def capture_brand(browser, g: dict, slug: str):
     url = f"{ORIGIN}{g['client_path']}"
     label = f"{g['brand_display']} / {g['style_display']}"
 
+    # Desktop — full gallery + photo view
     ctx = browser.new_context(viewport={"width": 1440, "height": 900})
     page = ctx.new_page()
-    page.goto(url, wait_until="networkidle", timeout=90000)
-    time.sleep(1.2)
-    shot(page, f"{prefix}-password-desktop.png")
     guest_enter(page, url)
-    shot(page, f"{prefix}-cover-desktop.png")
-    page.mouse.wheel(0, 700)
-    time.sleep(0.9)
-    shot(page, f"{prefix}-sets-grid-desktop.png")
-
-    imgs = page.locator("img").all()
-    opened = False
-    for img in imgs[1:8]:
-        try:
-            img.click(timeout=2000)
-            time.sleep(1.5)
-            opened = True
-            break
-        except Exception:
-            continue
-    if opened:
-        shot(page, f"{prefix}-photo-view-desktop.png")
+    # Scroll to top for full gallery composition (hero + folders)
+    page.evaluate("window.scrollTo(0, 0)")
+    time.sleep(0.6)
+    shot(page, f"{PREFIX}-{slug}-gallery-desktop.png")
+    # Also a mid-page sets view
+    page.mouse.wheel(0, 520)
+    time.sleep(0.7)
+    shot(page, f"{PREFIX}-{slug}-sets-desktop.png")
+    page.evaluate("window.scrollTo(0, 0)")
+    time.sleep(0.4)
+    if open_photo_view(page):
+        shot(page, f"{PREFIX}-{slug}-photo-view-desktop.png")
         page.keyboard.press("Escape")
-        time.sleep(0.5)
+        time.sleep(0.4)
     ctx.close()
 
+    # Mobile — full gallery + photo view
     mctx = browser.new_context(
         viewport={"width": 390, "height": 844},
         is_mobile=True,
@@ -118,77 +133,50 @@ def capture_brand(browser, g: dict, prefix: str):
         ),
     )
     page = mctx.new_page()
-    page.goto(url, wait_until="networkidle", timeout=90000)
-    time.sleep(1)
-    shot(page, f"{prefix}-password-mobile.png")
     guest_enter(page, url)
-    shot(page, f"{prefix}-cover-mobile.png")
-    page.mouse.wheel(0, 500)
-    time.sleep(0.8)
-    shot(page, f"{prefix}-sets-grid-mobile.png")
+    page.evaluate("window.scrollTo(0, 0)")
+    time.sleep(0.6)
+    shot(page, f"{PREFIX}-{slug}-gallery-mobile.png")
+    page.mouse.wheel(0, 400)
+    time.sleep(0.6)
+    shot(page, f"{PREFIX}-{slug}-sets-mobile.png")
+    page.evaluate("window.scrollTo(0, 0)")
+    time.sleep(0.3)
+    if open_photo_view(page):
+        shot(page, f"{PREFIX}-{slug}-photo-view-mobile.png")
     mctx.close()
     print(f"done {label}")
 
 
 def main() -> int:
-    tattva_prefix = f"{PREFIX}-tattva-editorial"
-    mini_prefix = f"{PREFIX}-mini-modern"
-    admin_name = f"{PREFIX}-admin-events-logos-desktop.png"
-
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
-
-        ctx = browser.new_context(viewport={"width": 1440, "height": 900})
-        page = ctx.new_page()
-        page.goto(f"{ORIGIN}/admin", wait_until="networkidle", timeout=90000)
-        time.sleep(0.8)
-        email = page.locator('input[type="email"]')
-        user = page.locator('input[name="username"], input[type="text"]').first
-        if email.count():
-            email.fill(ADMIN_EMAIL)
-        elif user.count():
-            user.fill(os.environ.get("ADMIN_USERNAME", "admin"))
-        page.locator('input[type="password"]').fill(ADMIN_PASS)
-        for name in ["Sign In", "Log in", "Login"]:
-            btn = page.get_by_role("button", name=name)
-            if btn.count():
-                btn.first.click()
-                break
-        page.wait_for_url("**/admin/**", timeout=25000)
-        time.sleep(1.5)
-        dismiss_dialogs(page)
-        page.goto(f"{ORIGIN}/admin/events", wait_until="networkidle")
-        time.sleep(1.2)
-        dismiss_dialogs(page)
-        shot(page, admin_name)
-        ctx.close()
-
-        capture_brand(browser, tattva, tattva_prefix)
-        capture_brand(browser, mini, mini_prefix)
-
+        capture_brand(browser, tattva, "tattva-editorial")
+        capture_brand(browser, mini, "mini-modern")
         browser.close()
 
-    index = OUT / "LOGOS_SCREENSHOTS.md"
+    index = OUT / "REFINE_SCREENSHOTS.md"
     lines = [
-        "# Genuine logo screenshots (Style A + Style B)",
+        "# Style A/B UI refine screenshots",
         "",
         f"Captured against `{ORIGIN}` at `{time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())}`.",
         f"Prefix: `{PREFIX}-*`",
         "",
-        f"- **Tattva** (Deep Crimson primary SVG): `{ORIGIN}{tattva['client_path']}`",
-        f"- **Mini Momentz** (colour logo): `{ORIGIN}{mini['client_path']}`",
+        "Changes: Soft Ivory hero titles on dark covers (Tattva); Mini logo soft plate (no transparent asset); larger Tattva logo; folder/spacing polish.",
         "",
-        "Fonts remain documented fallbacks until licensed files are supplied.",
+        f"- Tattva: `{ORIGIN}{tattva['client_path']}`",
+        f"- Mini: `{ORIGIN}{mini['client_path']}`",
         "",
         "| File | Description |",
         "| --- | --- |",
-        f"| `{admin_name}` | Admin events (ELP + client galleries) |",
-        f"| `{tattva_prefix}-password-desktop.png` | Tattva password + logo |",
-        f"| `{tattva_prefix}-cover-desktop.png` | Tattva cover / hero + logo |",
-        f"| `{tattva_prefix}-sets-grid-desktop.png` | Tattva sets |",
-        f"| `{tattva_prefix}-photo-view-desktop.png` | Tattva photo view |",
-        f"| `{tattva_prefix}-*-mobile.png` | Tattva mobile |",
-        f"| `{mini_prefix}-*-desktop.png` / `*-mobile.png` | Mini Momentz |",
+        f"| `{PREFIX}-tattva-editorial-gallery-desktop.png` | Tattva full gallery (desktop) |",
+        f"| `{PREFIX}-tattva-editorial-gallery-mobile.png` | Tattva full gallery (mobile) |",
+        f"| `{PREFIX}-tattva-editorial-photo-view-desktop.png` | Tattva photo view (desktop) |",
+        f"| `{PREFIX}-tattva-editorial-photo-view-mobile.png` | Tattva photo view (mobile) |",
+        f"| `{PREFIX}-mini-modern-gallery-desktop.png` | Mini full gallery (desktop) |",
+        f"| `{PREFIX}-mini-modern-gallery-mobile.png` | Mini full gallery (mobile) |",
+        f"| `{PREFIX}-mini-modern-photo-view-desktop.png` | Mini photo view (desktop) |",
+        f"| `{PREFIX}-mini-modern-photo-view-mobile.png` | Mini photo view (mobile) |",
         "",
         "## PNG sizes",
         "",
