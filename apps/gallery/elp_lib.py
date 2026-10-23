@@ -9,12 +9,206 @@ import os
 import re
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from urllib.parse import quote
+from urllib.parse import quote, urlparse
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+
+def resolve_repo_root(file_path: Path | None = None) -> Path:
+    """Repo root in git; filesystem root in the aio companion container.
+
+    Host layout: ``<root>/apps/gallery/elp_lib.py`` (parents[2] is the root).
+    Docker layout: ``/gallery/elp_lib.py`` — only ``/gallery`` and ``/`` exist,
+    so ``Path.parents[2]`` raises ``IndexError``. Walk up instead, and honour
+    ``ELP_REPO_ROOT`` / ``ELP_BRANDS_DIR`` / ``ELP_STYLES_DIR``.
+    """
+    override = os.environ.get("ELP_REPO_ROOT")
+    if override:
+        return Path(override)
+    start = (file_path or Path(__file__)).resolve()
+    if start.is_file() or start.suffix.lower() == ".py":
+        start = start.parent
+    for candidate in (start, *start.parents):
+        has_brands = (candidate / "brands").is_dir()
+        has_gallery = (candidate / "apps" / "gallery").is_dir()
+        has_styles = (candidate / "styles").is_dir()
+        if has_brands and (has_gallery or has_styles):
+            return candidate
+    return start
+
+
+REPO_ROOT = resolve_repo_root()
 GALLERY_DIR = Path(__file__).resolve().parent
 BRANDS_DIR = Path(os.environ.get("ELP_BRANDS_DIR", REPO_ROOT / "brands"))
 STYLES_DIR = Path(os.environ.get("ELP_STYLES_DIR", REPO_ROOT / "styles"))
+
+# PicPeak aio:stable admin session cookie. The login JSON has `user` only;
+# the JWT is Set-Cookie: admin_token=…; HttpOnly; Path=/.
+ADMIN_COOKIE_NAME = "admin_token"
+PICPEAK_PROXY_PREFIX = "/pp"
+PICPEAK_API_PREFIX = "/api"
+PICPEAK_LOGIN_PATH = "/api/auth/admin/login"
+PICPEAK_LOGOUT_PATH = "/api/auth/logout"
+PICPEAK_SESSION_PATH = "/api/auth/session"
+
+
+def normalize_picpeak_origin(origin: str | None) -> str:
+    """Scheme + host (+ port). Strip any path such as ``/api`` so joins cannot double it."""
+    raw = (origin or "").strip() or "http://127.0.0.1:3000"
+    if "://" not in raw:
+        raw = "http://" + raw
+    parsed = urlparse(raw)
+    scheme = parsed.scheme or "http"
+    netloc = parsed.netloc
+    if not netloc:
+        first = (parsed.path or "").split("/", 1)[0]
+        netloc = first or "127.0.0.1:3000"
+    return f"{scheme}://{netloc}".rstrip("/")
+
+
+def collapse_duplicate_api_prefix(path: str) -> str:
+    """``/api/api/auth/...`` → ``/api/auth/...``. Safe to call repeatedly."""
+    p = path or "/"
+    doubled = PICPEAK_API_PREFIX + PICPEAK_API_PREFIX
+    while "//" in p:
+        p = p.replace("//", "/")
+    while p.startswith(doubled):
+        p = PICPEAK_API_PREFIX + p[len(doubled) :]
+    while doubled in p:
+        p = p.replace(doubled, PICPEAK_API_PREFIX)
+    return p or "/"
+
+
+def normalize_picpeak_path(path: str | None, *, proxy_prefix: str = PICPEAK_PROXY_PREFIX) -> str:
+    """Console or PicPeak path → a single PicPeak path (no ``/pp``, no doubled ``/api``)."""
+    raw = path or "/"
+    parsed = urlparse(raw if "://" in raw else raw)
+    p = parsed.path or (raw.split("?", 1)[0] if "?" in raw else raw) or "/"
+    prefix = (proxy_prefix or PICPEAK_PROXY_PREFIX).rstrip("/") or PICPEAK_PROXY_PREFIX
+    while p == prefix or p.startswith(prefix + "/"):
+        p = p[len(prefix) :] or "/"
+    if not p.startswith("/"):
+        p = "/" + p
+    return collapse_duplicate_api_prefix(p)
+
+
+def join_picpeak_url(origin: str | None, path: str | None, query: str | None = None) -> str:
+    """Join PicPeak origin + path without emitting ``/api/api``.
+
+    Handles ``PICPEAK_ORIGIN=http://picpeak:3000/api`` plus a path that already
+    starts with ``/api/...``, doubled ``/pp`` prefixes, and ``/api/api`` slips.
+    """
+    raw_origin = (origin or "").strip() or "http://127.0.0.1:3000"
+    if "://" not in raw_origin:
+        raw_origin = "http://" + raw_origin
+    parsed_origin = urlparse(raw_origin)
+    host = normalize_picpeak_origin(raw_origin)
+    origin_path = parsed_origin.path or ""
+
+    parsed_req = urlparse(path or "/")
+    req_path = normalize_picpeak_path(parsed_req.path or path or "/")
+    if query in (None, ""):
+        query = parsed_req.query
+
+    combined = origin_path.rstrip("/") + "/" + req_path.lstrip("/")
+    if not combined.startswith("/"):
+        combined = "/" + combined
+    combined = collapse_duplicate_api_prefix(combined)
+    url = host + combined
+    if query:
+        url += "?" + str(query).lstrip("?")
+    return url
+
+
+def picpeak_proxy_url(path: str | None, *, proxy_prefix: str = PICPEAK_PROXY_PREFIX) -> str:
+    """Browser path on the Studio Console: ``/pp`` + one PicPeak path."""
+    prefix = (proxy_prefix or PICPEAK_PROXY_PREFIX).rstrip("/") or PICPEAK_PROXY_PREFIX
+    parsed = urlparse(path or "/")
+    joined = prefix + normalize_picpeak_path(parsed.path or path or "/", proxy_prefix=prefix)
+    if parsed.query:
+        joined += "?" + parsed.query
+    return joined
+
+
+def set_cookie_values(headers) -> list[str]:
+    """All Set-Cookie values from an HTTP header map (urllib / http.client)."""
+    if headers is None:
+        return []
+    getter = getattr(headers, "get_all", None)
+    if callable(getter):
+        values = getter("Set-Cookie") or getter("set-cookie") or []
+        return [v for v in values if v]
+    one = headers.get("Set-Cookie") or headers.get("set-cookie")
+    return [one] if one else []
+
+
+def rewrite_picpeak_cookie_for_proxy(header: str) -> str:
+    """Forward PicPeak cookies onto the Studio Console origin (localhost:3080).
+
+    Drop Domain (must not stay ``picpeak``) and Secure (console is HTTP on :3080).
+    Keep HttpOnly and force Path=/ so /pp requests receive admin_token.
+    """
+    raw = (header or "").strip()
+    if not raw:
+        return raw
+    parts = [p.strip() for p in raw.split(";") if p.strip()]
+    kept = [parts[0]]
+    saw_path = False
+    for attr in parts[1:]:
+        key = attr.split("=", 1)[0].strip().lower()
+        if key in {"domain", "secure"}:
+            continue
+        if key == "path":
+            kept.append("Path=/")
+            saw_path = True
+            continue
+        kept.append(attr)
+    if not saw_path:
+        kept.append("Path=/")
+    return "; ".join(kept)
+
+
+def admin_token_from_set_cookie(headers_or_values) -> str | None:
+    """Read the PicPeak JWT from Set-Cookie. Does not invent a token."""
+    if isinstance(headers_or_values, (list, tuple)):
+        values = list(headers_or_values)
+    else:
+        values = set_cookie_values(headers_or_values)
+    prefix = ADMIN_COOKIE_NAME + "="
+    for raw in values:
+        first = raw.split(";", 1)[0].strip()
+        if first.startswith(prefix):
+            token = first[len(prefix) :]
+            if token and token.lower() not in {"deleted", '""', "''"}:
+                return token
+    return None
+
+
+def session_from_picpeak_login(body, set_cookie=None) -> dict:
+    """Interpret aio:stable admin login. Never synthesises a JWT.
+
+    Stable body: ``{"user": {...}}`` plus ``Set-Cookie: admin_token=``.
+    Older bodies may still include ``token``. MFA returns ``mfaRequired``.
+    """
+    data = body if isinstance(body, dict) else {}
+    cookies = set_cookie if isinstance(set_cookie, (list, tuple)) else set_cookie_values(set_cookie)
+    cookie_token = admin_token_from_set_cookie(cookies)
+    json_token = data.get("token") if isinstance(data.get("token"), str) and data.get("token") else None
+    nested = data.get("user") if isinstance(data.get("user"), dict) else {}
+    if not json_token:
+        nested_token = nested.get("token")
+        json_token = nested_token if isinstance(nested_token, str) and nested_token else None
+    token = cookie_token or json_token
+    if data.get("mfaRequired"):
+        return {"ok": False, "reason": "mfa", "user": None, "token": None, "cookie_session": False}
+    user = data.get("user") if isinstance(data.get("user"), dict) else None
+    if not user:
+        return {"ok": False, "reason": "no_session", "user": None, "token": None, "cookie_session": False}
+    return {
+        "ok": True,
+        "reason": None,
+        "user": user,
+        "token": token,
+        "cookie_session": bool(cookie_token),
+    }
 
 ALLOWED_FILE_TYPES = "jpg,jpeg,png,webp,gif,heic,mp4,m4v,mov,webm"
 # PicPeak default photo cap is 50 MB; videos have a separate cap.
