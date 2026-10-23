@@ -15,6 +15,7 @@ Brands (client-facing identity per gallery): **Mini Momentz**, **Katha Films**, 
 | `demo-media/` | Royalty-free / generated placeholder photos for demos |
 | `docs/phase2-windows.md` | Safe Windows commands to apply Phase 2 without losing galleries |
 | `docs/storage.md` | Where photos live; why capacity looks huge |
+| `docs/storage-and-costs.md` | Usage, 70/85/95% alerts, archive/backup, costs, technical limits |
 | `IMPLEMENTED.md` | Done vs planned checklist |
 
 **Hard rules:** no Synology NAS access from agents; demo media only; no real client PII or hardcoded production secrets (use `.env` from `.env.example`).
@@ -93,7 +94,16 @@ docker compose up -d studio-console
 - PicPeak Admin: http://localhost:3000/admin  
 - ELP Studio Console (brands, tabs, Copy link, WhatsApp): http://localhost:3080  
 
-Full Windows steps: `docs/phase2-windows.md`. Storage: `docs/storage.md`. Synology is **not** connected — plan only in `docs/synology-deployment-plan.md`.
+Full Windows steps: `docs/phase2-windows.md`. Storage: `docs/storage.md` and `docs/storage-and-costs.md`. Synology is **not** connected — plan only in `docs/synology-deployment-plan.md`.
+
+**Storage & cost monitoring** (read-only; does not delete galleries or enable paid backups):
+
+```powershell
+cd apps\gallery
+python scripts\storage-report.py
+```
+
+Or open http://localhost:3080 → **Storage** after `docker compose up -d studio-console`. Alerts fire at 70%, 85%, and 95% of the disk PicPeak reports. PicPeak already has System Status, a single advisory soft limit, archive-to-zip, and Backup & Restore (default off).
 
 **HTTPS preview:** not enabled in this demo (`COOKIE_SECURE=auto`, no Tunnel). For HTTPS later, set `FRONTEND_URL` + Cloudflare Tunnel (or similar) and `TRUST_PROXY=1` — see Planned items in `IMPLEMENTED.md`.
 

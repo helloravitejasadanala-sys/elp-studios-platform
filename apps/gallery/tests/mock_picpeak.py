@@ -63,13 +63,50 @@ class H(BaseHTTPRequestHandler):
             )
             return
         if path.endswith("/api/admin/settings/storage/info"):
-            self._json(200, {"total_used": 850000000, "disk_total": 819855818752})
+            self._json(
+                200,
+                {
+                    "total_used": 850000000,
+                    "cataloged_bytes": 720000000,
+                    "disk_total": 819855818752,
+                    "disk_available": 700000000000,
+                    "disk_metrics_reliable": True,
+                    "storage_measurement": "disk",
+                    "archive_storage": 0,
+                    "storage_by_event": [{"id": 7, "event_name": "Mini Momentz — Keep Existing Gallery", "size": 720000000}],
+                    "storage_soft_limit": None,
+                    "configured_soft_limit": None,
+                    "soft_limit_configured": False,
+                },
+            )
+            return
+        if path.endswith("/api/admin/settings"):
+            self._json(
+                200,
+                {
+                    "backup_enabled": False,
+                    "general_max_file_size_mb": 50,
+                    "general_max_video_size_mb": 500,
+                    "general_allowed_file_types": "jpg,jpeg,png,webp,mp4,mov,webm",
+                },
+            )
+            return
+        if path.endswith("/api/admin/backup/config") or path.endswith("/api/admin/backup/status"):
+            self._json(200, {"backup_enabled": False, "backup_destination_type": None})
             return
         if path.startswith("/api/admin/events"):
             self._json(200, {"events": EVENTS})
             return
         if "/photos/" in path:
-            self._json(200, {"photos": [{"id": 1, "filename": "demo.jpg"}]})
+            self._json(
+                200,
+                {
+                    "photos": [
+                        {"id": 1, "filename": "demo.jpg", "size_bytes": 1200000, "mime_type": "image/jpeg", "created_at": "2026-10-20T10:00:00Z"},
+                        {"id": 2, "filename": "clip.mp4", "size_bytes": 8800000, "mime_type": "video/mp4", "created_at": "2026-10-21T10:00:00Z"},
+                    ]
+                },
+            )
             return
         self._json(404, {"error": path})
 

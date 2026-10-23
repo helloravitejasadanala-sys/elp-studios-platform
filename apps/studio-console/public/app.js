@@ -109,6 +109,7 @@ function render() {
   if (state.token) {
     topbar.innerHTML = `
       <button class="btn" data-go="dashboard">Galleries</button>
+      <button class="btn" data-go="storage">Storage</button>
       <button class="btn primary" data-go="wizard">New gallery</button>
       <button class="btn ghost" id="logout">Log out</button>
     `;
@@ -128,6 +129,7 @@ function render() {
   if (!state.token || state.view === "login") return renderLogin();
   if (state.view === "wizard") return renderWizard();
   if (state.view === "event") return renderEvent();
+  if (state.view === "storage") return renderStorage();
   return renderDashboard();
 }
 
@@ -222,6 +224,7 @@ function renderDashboard() {
         <p class="eyebrow">Storage</p>
         <h2 style="margin:0">${used != null ? formatBytes(used) : "See PicPeak Admin"} used</h2>
         <p class="muted">${disk != null ? "Reported capacity " + formatBytes(disk) + " is usually the Windows/WSL2 virtual disk, not Synology." : "Run scripts/verify-storage.ps1 for the volume path."}</p>
+        <p><button class="btn" data-go="storage">Storage &amp; costs</button></p>
       </div>
     </div>
     <div class="card" style="margin-top:1rem">
@@ -282,6 +285,12 @@ function renderDashboard() {
   };
   main.querySelectorAll("[data-open]").forEach((btn) => {
     btn.onclick = () => openEvent(Number(btn.dataset.open));
+  });
+  main.querySelectorAll("[data-go]").forEach((btn) => {
+    btn.onclick = () => {
+      state.view = btn.dataset.go;
+      render();
+    };
   });
 }
 
@@ -741,6 +750,280 @@ async function chunkedUpload(eventId, file, bar) {
     method: "POST",
     json: { category_id: null, detect_duplicates: true },
   });
+}
+
+async function loadStorageReport() {
+  const headers = {};
+  if (state.token) headers.Authorization = `Bearer ${state.token}`;
+  const res = await fetch("/elp/storage-report", { headers });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+  state.storageReport = data;
+  return data;
+}
+
+function renderStorage() {
+  const cfg = state.config?.storage || {};
+  const report = state.storageReport;
+  if (!report && !state.storageLoading && !state.storageError) {
+    state.storageLoading = true;
+    loadStorageReport()
+      .catch((err) => {
+        state.storageError = err.message;
+      })
+      .finally(() => {
+        state.storageLoading = false;
+        if (state.view === "storage") renderStorage();
+      });
+  }
+  if (!report) {
+    main.innerHTML = `<div class="card"><h2>Storage &amp; cost monitoring</h2>
+      <p class="${state.storageError ? "error" : "muted"}">${
+        state.storageError || "Reading PicPeak storage/info (no files are deleted)…"
+      }</p>
+      ${state.storageError ? `<p><button class="btn" id="retry-storage">Try again</button></p>` : ""}
+    </div>`;
+    const retry = $("#retry-storage");
+    if (retry)
+      retry.onclick = () => {
+        state.storageError = "";
+        renderStorage();
+      };
+    return;
+  }
+  const usage = report.usage || {};
+  const alert = report.alert || {};
+  const rem = report.remaining || {};
+  const bak = report.backup || {};
+  const percent = usage.percent_used;
+  const meter = Math.max(0, Math.min(100, Number(percent) || 0));
+  main.innerHTML = `
+    <div class="alert-banner ${esc(alert.level || "")}">
+      <strong>${esc(alert.title || "Storage")}</strong>
+      <p>${esc(alert.advice || "")}</p>
+    </div>
+    <div class="grid two" style="margin-top:1rem">
+      <div class="card">
+        <p class="eyebrow">Docker / PicPeak disk</p>
+        <h2 style="margin:0">${formatBytes(usage.total_used)} used</h2>
+        <div class="meter"><span class="${esc(alert.level || "ok")}" style="width:${meter}%"></span></div>
+        <p class="muted">${formatBytes(usage.disk_available)} free of ${formatBytes(usage.disk_total)} reported · ${
+          percent != null ? percent + "%" : "n/a"
+        }</p>
+        <p class="hint">${esc(report.capacity_note || "")}</p>
+        <p class="hint">Volume <code>${esc(report.volume_name)}</code>. Measurement: ${esc(
+          usage.storage_measurement || "PicPeak GET /api/admin/settings/storage/info"
+        )}. Host check: <code>scripts/verify-storage.ps1</code>.</p>
+      </div>
+      <div class="card">
+        <p class="eyebrow">Remaining at recent upload rate</p>
+        <h2 style="margin:0">${
+          rem.days_remaining != null ? rem.days_remaining + " days" : rem.status === "idle" ? "Idle" : "Unknown"
+        }</h2>
+        <p class="muted">${esc(rem.note || "")}</p>
+        <p class="hint">Lookback ${report.lookback_days || 14} days · ${formatBytes(
+          report.recent_upload_bytes
+        )} uploaded · ${report.recent_upload_files || 0} files · confidence ${esc(rem.confidence || "none")}</p>
+      </div>
+    </div>
+    ${renderBreakdown(usage.storage_breakdown)}
+    <div class="card" style="margin-top:1rem">
+      <div class="row" style="justify-content:space-between">
+        <div>
+          <p class="eyebrow">Per-event usage</p>
+          <h3 style="margin:0.2rem 0 0">Photos vs videos</h3>
+        </div>
+        <button class="btn" id="refresh-storage">Refresh</button>
+      </div>
+      <p class="hint">Photo/video split uses each event’s media list. PicPeak storage_by_event is catalogued original bytes (top events) and is not a disk walk.</p>
+      <div style="overflow:auto;margin-top:0.6rem">
+        <table class="table">
+          <thead><tr><th>Gallery</th><th>Photos</th><th>Videos</th><th>Total</th><th></th></tr></thead>
+          <tbody>
+            ${
+              (report.events || [])
+                .map(
+                  (ev) => `<tr>
+                    <td><strong>${esc(ev.event_name)}</strong><br><span class="badge ${esc(ev.status)}">${esc(
+                      ev.status
+                    )}</span></td>
+                    <td>${ev.has_media_split ? `${ev.photo_count} · ${formatBytes(ev.photo_bytes)}` : "—"}</td>
+                    <td>${ev.has_media_split ? `${ev.video_count} · ${formatBytes(ev.video_bytes)}` : "—"}</td>
+                    <td>${formatBytes(ev.total_bytes)}</td>
+                    <td>${ev.id ? `<button class="btn" data-open="${ev.id}">Open</button>` : ""}</td>
+                  </tr>`
+                )
+                .join("") || `<tr><td colspan="5" class="muted">No events returned.</td></tr>`
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+    ${renderArchivePolicy(report, cfg)}
+    ${renderBackupCard(report, bak, cfg)}
+    ${renderCostCard(report)}
+    ${renderLimitsCard(report)}
+  `;
+  const refresh = $("#refresh-storage");
+  if (refresh)
+    refresh.onclick = async () => {
+      state.storageReport = null;
+      state.storageError = "";
+      renderStorage();
+    };
+  main.querySelectorAll("[data-open]").forEach((btn) => {
+    btn.onclick = () => openEvent(Number(btn.dataset.open));
+  });
+  bindArchiveConfirm(report);
+  bindRestoreChecks();
+}
+
+function renderBreakdown(breakdown) {
+  if (!breakdown || typeof breakdown !== "object") return "";
+  const rows = Object.entries(breakdown)
+    .map(([k, v]) => `<tr><td>${esc(k)}</td><td>${formatBytes(v)}</td></tr>`)
+    .join("");
+  if (!rows) return "";
+  return `<div class="card" style="margin-top:1rem"><p class="eyebrow">On-disk breakdown</p>
+    <table class="table"><tbody>${rows}</tbody></table>
+    <p class="hint">From PicPeak’s storage walk (thumbnails, archives, caches). Not a second copy of your photos.</p></div>`;
+}
+
+function renderArchivePolicy(report, cfg) {
+  const policy = report.archive_policy || cfg.archivePolicy || {};
+  const steps = policy.steps || [];
+  const never = policy.never || [];
+  return `<div class="card" style="margin-top:1rem">
+    <p class="eyebrow">Archive &amp; deletion</p>
+    <h3 style="margin:0.2rem 0 0.6rem">PicPeak native — this console never deletes</h3>
+    <ul>${steps.map((s) => `<li>${esc(s)}</li>`).join("")}</ul>
+    <p class="muted">Never: ${never.map((s) => esc(s)).join(" · ")}</p>
+    <label>Type the exact gallery name to unlock the PicPeak Admin archive link</label>
+    <select id="archive-event">${(report.events || [])
+      .map((ev) => `<option value="${esc(ev.event_name)}">${esc(ev.event_name)}</option>`)
+      .join("")}</select>
+    <input id="archive-confirm" placeholder="Type the gallery name" autocomplete="off" />
+    <p class="error" id="archive-hint">Name must match exactly. No archive or delete request is sent from here.</p>
+    <div class="row">
+      <a class="btn" id="open-archives" target="_blank" rel="noopener" href="${esc(
+        cfg.adminArchives || "#"
+      )}">Open PicPeak Archives</a>
+      <a class="btn danger" id="open-archive-event" aria-disabled="true">Archive in PicPeak Admin…</a>
+    </div>
+  </div>`;
+}
+
+function bindArchiveConfirm(report) {
+  const select = $("#archive-event");
+  const input = $("#archive-confirm");
+  const link = $("#open-archive-event");
+  const hint = $("#archive-hint");
+  if (!select || !input || !link) return;
+  const origin = state.config?.picpeakPublicOrigin || "";
+  const sync = () => {
+    const name = select.value;
+    const ok = input.value.trim() === name && name.length > 0;
+    link.setAttribute("aria-disabled", ok ? "false" : "true");
+    if (ok) {
+      link.href = `${origin}/admin`;
+      hint.textContent = "Opens PicPeak Admin. Use Archive Gallery there (zip, then active originals are removed). Restore stays on Archives. This console still has not deleted anything.";
+      hint.className = "success";
+    } else {
+      link.removeAttribute("href");
+      hint.textContent = "Name must match exactly. No archive or delete request is sent from here.";
+      hint.className = "error";
+    }
+  };
+  select.onchange = sync;
+  input.oninput = sync;
+  link.onclick = (e) => {
+    if (link.getAttribute("aria-disabled") === "true") e.preventDefault();
+  };
+}
+
+function renderBackupCard(report, bak, cfg) {
+  const policy = report.backup_policy || cfg.backupPolicy || {};
+  const checks = policy.restore_test || [];
+  const enabled = bak.enabled === true;
+  return `<div class="card" style="margin-top:1rem">
+    <p class="eyebrow">Backup status</p>
+    <h3 style="margin:0.2rem 0 0.4rem">${enabled ? "PicPeak built-in backup is on" : "PicPeak built-in backup is off (default)"}</h3>
+    <p class="muted">Destination: ${esc(bak.destination_type || "none")} · last run: ${esc(
+      bak.last_run || "never"
+    )} · next: ${esc(bak.next_run || "not scheduled")}</p>
+    <p class="hint">${esc(bak.note || policy.independent || "")} aio writes local backups under ${esc(
+      policy.aio_local_path || "/data/backup"
+    )} — that is the same volume, not an off-site copy. This page does not enable S3, rsync, or email.</p>
+    <p><a class="btn" target="_blank" rel="noopener" href="${esc(cfg.adminBackup || "#")}">Open PicPeak Backup &amp; Restore</a></p>
+    <p class="eyebrow" style="margin-top:1rem">Restore testing checklist (saved only in this browser)</p>
+    <ul class="check-list" id="restore-checks">
+      ${checks
+        .map(
+          (item, i) =>
+            `<li><label class="row"><input type="checkbox" data-restore="${i}" style="width:auto"> ${esc(item)}</label></li>`
+        )
+        .join("")}
+    </ul>
+  </div>`;
+}
+
+function bindRestoreChecks() {
+  const key = "elp-restore-checklist";
+  let saved = [];
+  try {
+    saved = JSON.parse(localStorage.getItem(key) || "[]");
+  } catch {
+    saved = [];
+  }
+  main.querySelectorAll("[data-restore]").forEach((box) => {
+    box.checked = !!saved[Number(box.dataset.restore)];
+    box.onchange = () => {
+      const next = [...saved];
+      next[Number(box.dataset.restore)] = box.checked;
+      localStorage.setItem(key, JSON.stringify(next));
+      saved = next;
+    };
+  });
+}
+
+function renderCostCard(report) {
+  const cats = report.cost_categories || [];
+  return `<div class="card" style="margin-top:1rem">
+    <p class="eyebrow">Costs</p>
+    <h3 style="margin:0.2rem 0 0.6rem">Software vs hosting vs backup vs optional extras</h3>
+    <p class="hint">Nothing here is a paid commitment. Optional services stay off until you choose them outside this repo.</p>
+    <table class="table">
+      <thead><tr><th>Category</th><th>Committed?</th><th></th></tr></thead>
+      <tbody>
+        ${cats
+          .map(
+            (c) =>
+              `<tr><td><strong>${esc(c.label)}</strong></td><td>${
+                c.committed ? "Yes" : "No"
+              }</td><td>${esc(c.summary)}</td></tr>`
+          )
+          .join("")}
+      </tbody>
+    </table>
+  </div>`;
+}
+
+function renderLimitsCard(report) {
+  const live = report.limits_live || {};
+  const limits = report.technical_limits || [];
+  return `<div class="card" style="margin-top:1rem">
+    <p class="eyebrow">Technical limits</p>
+    <h3 style="margin:0.2rem 0 0.6rem">Uploads, video, and this server</h3>
+    <p class="muted">Live PicPeak caps: photos ${esc(live.max_photo_mb)} MB · videos ${esc(
+      live.max_video_mb
+    )} MB · types ${esc(live.allowed_file_types || "see Admin")}</p>
+    <table class="table">
+      <thead><tr><th>Limit</th><th>What PicPeak / Docker actually does</th></tr></thead>
+      <tbody>
+        ${limits.map((item) => `<tr><td>${esc(item.label)}</td><td>${esc(item.value)}<br><span class="muted">${esc(item.source)}</span></td></tr>`).join("")}
+      </tbody>
+    </table>
+  </div>`;
 }
 
 function formatBytes(n) {

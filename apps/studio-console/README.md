@@ -1,11 +1,12 @@
 # ELP Studio Console
 
-A small companion for PicPeak: tabbed gallery creation, three-brand picker, optional email, WhatsApp sharing, and a simpler dashboard.
+A small companion for PicPeak: tabbed gallery creation, three-brand picker, optional email, WhatsApp sharing, a simpler dashboard, and **Storage & cost monitoring**.
 
 It does **not** replace PicPeak, store photos, or touch the `elp-picpeak-data` volume.
 
 - PicPeak Admin remains at http://localhost:3000/admin
 - Studio Console is at http://localhost:3080
+- Storage page reads PicPeak `storage/info` only. It does not archive, delete, or enable paid backup destinations.
 
 ## Start (existing install)
 

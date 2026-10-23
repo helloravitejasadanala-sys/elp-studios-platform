@@ -53,6 +53,7 @@ PicPeak Admin remains at http://localhost:3000/admin.
 8. Phone and desktop browser  
 9. Volume still named `elp-picpeak-data` (`docker volume ls`)  
 10. `.env` is not committed
+11. Studio Console → **Storage**: usage, 70/85/95% alerts, per-event photo/video, remaining-capacity estimate. Confirm it does **not** delete anything. Optional: `python scripts\storage-report.py`
 
 ## 6. If compose warns it will recreate `picpeak`
 

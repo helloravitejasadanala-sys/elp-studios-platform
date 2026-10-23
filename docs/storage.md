@@ -1,5 +1,7 @@
 # Storage (read-only notes)
 
+Monitoring, 70/85/95% alerts, costs, limits, archive safeguards, and restore testing: **`docs/storage-and-costs.md`**. Studio Console → **Storage**, or `python scripts/storage-report.py`.
+
 The live install uses the Docker named volume **`elp-picpeak-data`**, mounted at `/data` inside `elp-picpeak`.
 
 ## What that means

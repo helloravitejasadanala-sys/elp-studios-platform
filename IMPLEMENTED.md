@@ -1,6 +1,6 @@
 # Implemented vs Planned
 
-Last updated: 2026-10-23 (Phase 2 — video settings, Studio Console, WhatsApp, optional email).
+Last updated: 2026-10-23 (Storage & cost monitoring on Studio Console).
 
 ## Legend
 
@@ -24,6 +24,7 @@ Last updated: 2026-10-23 (Phase 2 — video settings, Studio Console, WhatsApp, 
 | Three brands | `brands/*/brand.json` + per-event logo/CSS | Mini/Tattva genuine logos; Katha placeholder |
 | Style A/B/C CSS templates | PicPeak CSS slots 1–3 | `styles/` |
 | Named volume persistence | `elp-picpeak-data` | Compose file; `docs/storage.md` |
+| **Storage & cost monitoring** | PicPeak `storage/info` + ELP 70/85/95% alerts, per-event photo/video, remaining-capacity estimate, archive confirmation **links**, backup status (left off) | Studio Console → Storage; `scripts/storage-report.py`; `docs/storage-and-costs.md` |
 
 ## Font / logo status
 
@@ -43,7 +44,7 @@ Last updated: 2026-10-23 (Phase 2 — video settings, Studio Console, WhatsApp, 
 | Genuine Katha logo | Owner must supply |
 | Licensed fonts | Owner must supply; sanitizer blocks `@import` |
 | Synology hosting | Plan only — `docs/synology-deployment-plan.md` |
-| Independent backup automation | Documented; owner Hyper Backup / offsite |
+| Independent backup automation | Documented; PicPeak backup stays **off**; owner Hyper Backup / offsite when chosen |
 | Editor workspace / TrustOS | Out of scope here |
 
 ## Not production-ready

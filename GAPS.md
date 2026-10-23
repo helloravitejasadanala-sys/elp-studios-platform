@@ -15,7 +15,12 @@ Verification against PicPeak docs (2026-10-23) and `picpeak/aio:stable`. Prefer 
 | Three brands | One global Branding page; per-event logo + CSS | **Per-event** + console selector |
 | PicPeak attribution | `hide_powered_by` left off | **Retained** |
 | Storage location | Named volume `elp-picpeak-data` → `/data` | **Windows Docker**, not NAS |
-| Dashboard ~763 GB | `statfs` of container disk (WSL2 VHD / host drive) | **Documented** |
+| Dashboard ~763 GB | `statfs` of container disk (WSL2 VHD / host drive) | **Documented** + Storage page warning |
+| Disk alerts 70/85/95 | PicPeak has **one** advisory soft limit | **ELP console** (does not replace PicPeak) |
+| Per-event photo vs video bytes | `storage_by_event` is originals, mixed types, top 10 | **ELP** classifies media lists |
+| Remaining capacity | Not native | **ELP** 14-day upload rate vs `disk_available` |
+| Archive/delete safeguards | Native zip-then-delete + Archives restore; expiry auto-archive | **ELP** type-to-confirm, then Admin link only |
+| Backup | Native; default off; aio `/data/backup` is same volume | **Status + restore checklist**; S3 not enabled |
 | Synology | Not in compose | **Plan only** |
 
 ## Genuine limitations (do not fake)

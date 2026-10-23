@@ -19,7 +19,18 @@ HERE = Path(__file__).resolve().parent
 PUBLIC = HERE / "public"
 GALLERY = HERE.parent / "gallery"
 sys.path.insert(0, str(GALLERY))
-from elp_lib import BRANDS_DIR, load_brands, load_dotenv  # noqa: E402
+from elp_lib import (  # noqa: E402
+    ARCHIVE_POLICY,
+    BACKUP_POLICY,
+    BRANDS_DIR,
+    COST_CATEGORIES,
+    STORAGE_ALERT_THRESHOLDS,
+    STORAGE_VOLUME_NAME,
+    TECHNICAL_LIMITS,
+    build_storage_report,
+    load_brands,
+    load_dotenv,
+)
 
 load_dotenv(GALLERY / ".env")
 
@@ -57,6 +68,17 @@ def _config() -> dict:
             "maxPhotoMb": 50,
             "note": "PicPeak plays the uploaded file. Prefer H.264 MP4 for mobile + desktop. Originals are not recompressed on download when original-resolution downloads are on.",
         },
+        "storage": {
+            "volumeName": STORAGE_VOLUME_NAME,
+            "alerts": list(STORAGE_ALERT_THRESHOLDS),
+            "costCategories": list(COST_CATEGORIES),
+            "technicalLimits": list(TECHNICAL_LIMITS),
+            "archivePolicy": ARCHIVE_POLICY,
+            "backupPolicy": BACKUP_POLICY,
+            "adminBackup": f"{PICPEAK_PUBLIC_ORIGIN}/admin/backup",
+            "adminArchives": f"{PICPEAK_PUBLIC_ORIGIN}/admin/events/archives",
+            "adminSettings": f"{PICPEAK_PUBLIC_ORIGIN}/admin/settings",
+        },
     }
 
 
@@ -89,6 +111,9 @@ class Handler(BaseHTTPRequestHandler):
             return
         if path == "/config.json":
             self._send_json(200, _config())
+            return
+        if path == "/elp/storage-report":
+            self._storage_report()
             return
         if path.startswith("/brand-assets/"):
             self._brand_asset(path[len("/brand-assets/") :])
@@ -147,6 +172,77 @@ class Handler(BaseHTTPRequestHandler):
             ".webp": "image/webp",
         }.get(target.suffix.lower(), "application/octet-stream")
         self._send(200, target.read_bytes(), ctype)
+
+    def _picpeak_json(self, path: str, timeout: int = 45) -> tuple[int, object]:
+        dest = PICPEAK_ORIGIN + path
+        headers = {"Accept": "application/json", "Origin": PICPEAK_ORIGIN}
+        auth = self.headers.get("Authorization")
+        if auth:
+            headers["Authorization"] = auth
+        cookie = self.headers.get("Cookie")
+        if cookie:
+            headers["Cookie"] = cookie
+        req = Request(dest, headers=headers, method="GET")
+        try:
+            with urlopen(req, timeout=timeout) as resp:
+                raw = resp.read().decode("utf-8") or "{}"
+                return resp.status, json.loads(raw) if raw else {}
+        except HTTPError as exc:
+            raw = exc.read().decode("utf-8", errors="replace")
+            try:
+                parsed = json.loads(raw) if raw else {"error": str(exc)}
+            except json.JSONDecodeError:
+                parsed = {"error": raw or str(exc)}
+            return exc.code, parsed
+        except URLError as exc:
+            return 502, {"error": str(exc.reason), "origin": PICPEAK_ORIGIN}
+
+    def _storage_report(self) -> None:
+        if not (self.headers.get("Authorization") or self.headers.get("Cookie")):
+            self._send_json(401, {"error": "Sign in first. Storage report uses your PicPeak admin session."})
+            return
+        _code, info = self._picpeak_json("/api/admin/settings/storage/info")
+        if _code >= 400:
+            self._send_json(
+                _code if _code != 502 else 502,
+                {"error": "Could not read PicPeak storage/info", "detail": info},
+            )
+            return
+        _code, settings = self._picpeak_json("/api/admin/settings")
+        if _code >= 400:
+            settings = {}
+        _code, events_body = self._picpeak_json("/api/admin/events?page=1&limit=100")
+        events = []
+        if isinstance(events_body, dict):
+            events = events_body.get("events") or events_body.get("data") or []
+        elif isinstance(events_body, list):
+            events = events_body
+        backup = {}
+        for path in ("/api/admin/backup/config", "/api/admin/backup/status", "/api/admin/backup"):
+            code, body = self._picpeak_json(path)
+            if code < 400 and isinstance(body, dict) and "error" not in body:
+                backup = body
+                break
+        photos_by_event = {}
+        for event in events[:40]:
+            eid = event.get("id")
+            if eid is None:
+                continue
+            code, body = self._picpeak_json(f"/api/admin/photos/{eid}/photos")
+            if code >= 400:
+                continue
+            if isinstance(body, dict):
+                photos_by_event[eid] = body.get("photos") or body.get("data") or []
+            elif isinstance(body, list):
+                photos_by_event[eid] = body
+        report = build_storage_report(
+            info=info if isinstance(info, dict) else {},
+            events=events,
+            photos_by_event=photos_by_event,
+            settings=settings if isinstance(settings, dict) else {},
+            backup=backup,
+        )
+        self._send_json(200, report)
 
     def _proxy(self, parsed) -> None:
         if not parsed.path.startswith("/pp/"):

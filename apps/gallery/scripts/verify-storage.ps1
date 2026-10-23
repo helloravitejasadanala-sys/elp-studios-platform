@@ -26,6 +26,9 @@ docker exec elp-picpeak sh -c "ls -la /data; echo '--- db ---'; ls -la /data/db 
 Write-Host "`n== Usage (df of the container mount) =="
 docker exec elp-picpeak df -h /data
 
+Write-Host "`n== Folder sizes inside /data (read-only du) =="
+docker exec elp-picpeak sh -c "du -sh /data /data/storage /data/db /data/backup /data/storage/events /data/storage/thumbnails 2>/dev/null"
+
 Write-Host "`n== PicPeak health =="
 try {
   Invoke-RestMethod -Uri "http://127.0.0.1:3000/health" -TimeoutSec 5 | ConvertTo-Json -Compress
@@ -35,5 +38,7 @@ try {
 
 Write-Host "`nInterpretation:"
 Write-Host "- Mount source 'elp-picpeak-data' is a Docker named volume on THIS Windows/WSL2 machine, not Synology, unless you later bind-mounted a NAS path."
-Write-Host "- Dashboard 'capacity' is usually the virtual disk (WSL2 VHD / drive), not a dedicated gallery quota. See docs/storage.md."
+Write-Host "- Dashboard 'capacity' is usually the virtual disk (WSL2 VHD / drive), not a dedicated gallery quota. See docs/storage.md and docs/storage-and-costs.md."
 Write-Host "- Data survives 'docker compose down' (without -v) and container recreation because the volume is named elp-picpeak-data."
+Write-Host "- 70/85/95% alerts, per-event photo/video, remaining-capacity estimate: Studio Console → Storage, or python scripts\storage-report.py"
+Write-Host "- This script never archives, deletes, or enables paid backup destinations."

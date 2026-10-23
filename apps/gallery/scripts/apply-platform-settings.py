@@ -167,6 +167,8 @@ def main() -> int:
     print(f"  origin: {origin}")
     print(f"  dry_run: {args.dry_run}")
     print("  will NOT create/delete galleries or touch Docker volumes")
+    print("  will NOT enable PicPeak backup, S3, or other paid destinations")
+    print("  will NOT change storage soft-limit (set 70% yourself in Admin → System Status if you want PicPeak’s native banner)")
     print(json.dumps(planned, indent=2))
     if args.dry_run:
         return 0
