@@ -42,16 +42,20 @@ services:
     ports:
       - "${STUDIO_PORT:-3080}:3080"
     volumes:
-      - ../../apps/studio-console:/app:ro
+      # Compose lives in apps/gallery. Do not mount elp-picpeak-data here.
+      # /gallery/elp_lib.py is only one level under /, same as the live Windows install.
+      - .:/gallery:ro
+      - ../studio-console:/app:ro
       - ../../brands:/brands:ro
       - ../../styles:/styles:ro
-      - ../../apps/gallery:/gallery:ro
     environment:
       STUDIO_BIND: 0.0.0.0
       STUDIO_PORT: 3080
       PICPEAK_ORIGIN: http://picpeak:3000
       PICPEAK_PUBLIC_ORIGIN: ${PICPEAK_PUBLIC_ORIGIN:-http://localhost:3000}
       ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@elp.local}
+      ELP_REPO_ROOT: /
+      ELP_GALLERY_DIR: /gallery
       ELP_BRANDS_DIR: /brands
       ELP_STYLES_DIR: /styles
       PYTHONPATH: /gallery
