@@ -29,14 +29,14 @@ Docs: [Single-container install](https://docs.picpeak.app/deployment/single-cont
 - ~2 GB free RAM for the container
 - Ports: host `3000` → container `3000` (configurable)
 
-### Windows (Docker Desktop) — install and run
+### Windows (Docker Desktop on Dell) — install and run
 
 1. Install [Docker Desktop for Windows](https://docs.docker.com/desktop/setup/install/windows-install/) and start it. Wait until the whale icon shows **Engine running**.
 2. Open **PowerShell** or **Windows Terminal**.
-3. Clone this repo (after the GitHub remote exists):
+3. Clone this repo:
 
    ```powershell
-   git clone https://github.com/OWNER/elp-studios-platform.git
+   git clone https://github.com/helloravitejasadanala-sys/elp-studios-platform.git
    cd elp-studios-platform\apps\gallery
    ```
 
@@ -47,7 +47,7 @@ Docs: [Single-container install](https://docs.picpeak.app/deployment/single-cont
    notepad .env
    ```
 
-   Set `ADMIN_PASSWORD` to a strong demo password (upper + lower + number, 8+ chars).
+   Set `ADMIN_PASSWORD` to a strong demo password (upper + lower + number, **12+ chars** preferred for PicPeak first-boot change). First login may require changing the password in Admin before APIs unlock.
 
 5. Start:
 
@@ -58,15 +58,25 @@ Docs: [Single-container install](https://docs.picpeak.app/deployment/single-cont
 6. Open admin: http://localhost:3000/admin  
    Login with `ADMIN_USERNAME` / `ADMIN_PASSWORD` from `.env`.
 
-7. Create a gallery (event), set a **guest password**, upload files from `demo-media\`, copy the client link, open it in a private window and verify favourites + download.
+7. **Quick Style A/B demo** (after Python 3 is available):
 
-8. Stop:
+   ```powershell
+   python scripts\seed-styles-demo.py
+   ```
+
+   Or manually: Select CSS template (Wedding Editorial / Modern Story) → create event → sets → upload from `demo-media\` → publish → copy client link. Guest password from `GUEST_PASSWORD` if seeded.
+
+8. Client: open the share link in a private window — Cover → View Gallery → sets → photo/video → downloads.
+
+9. Stop:
 
    ```powershell
    docker compose down
    ```
 
    Data stays in the Docker volume `elp-picpeak-data` until you remove the volume.
+
+**HTTPS preview:** not enabled in this demo (`COOKIE_SECURE=auto`, no Tunnel). For HTTPS later, set `FRONTEND_URL` + Cloudflare Tunnel (or similar) and `TRUST_PROXY=1` — see Planned items in `IMPLEMENTED.md`.
 
 ### Linux / macOS
 
@@ -102,11 +112,27 @@ docker run --rm -v elp-picpeak-data:/data -v "%CD%:/backup" alpine \
 
 PicPeak also has an in-app backup under Admin; still keep a copy of `jwt.secret` / the whole `/data` tree. See [PicPeak Backup & Restore](https://docs.picpeak.app/).
 
-### Brand separation (demo approach)
+### Brand + style separation (config-driven)
 
-One PicPeak instance (saves RAM). Differentiate brands **per gallery** (logo / colours / custom styling in Admin), not three full stacks — unless you later choose multi-instance for isolation.
+One PicPeak instance (saves RAM). Per gallery:
+
+- **Brand** — `brands/<id>/brand.json` + labelled logo placeholder (`brands/placeholders/`)
+- **Style** — `styles/wedding-editorial` (Style A) or `styles/modern-story` (Style B) → PicPeak CSS template slots
+
+Owner brand colours (Tattva crimson/plum/ivory; Mini teal/terracotta/…) live in those config files. Change fonts/colours there and re-apply the CSS template — **no app rebuild**. Official fonts/logos are **not** invented; see `styles/README.md`.
 
 Optional hostnames (Cloudflare Tunnel later): `gallery.minimomentz…`, `gallery.kathafilms…`, `gallery.tattvaweddings…` → same container.
+
+### Style demos (Tattva + Mini Momentz)
+
+```bash
+cd apps/gallery
+docker compose up -d
+python3 scripts/seed-styles-demo.py          # Style A + B galleries, SHA-256 integrity
+python3 scripts/capture-styles-screenshots.py # optional Playwright shots
+```
+
+Results: `apps/gallery/test-results/STYLES_ORIGINAL_INTEGRITY.md`
 
 ### Smoke tests
 
@@ -145,7 +171,7 @@ Configure PicPeak so guest downloads are **exact uploaded bytes**:
 - watermarks off (global + per-gallery)
 - `general_use_original_filenames_for_downloads=true`
 
-Prove with: `python3 apps/gallery/scripts/seed-sets-demo.py` → `apps/gallery/test-results/ORIGINAL_INTEGRITY.md` (SHA-256).
+Prove with: `python3 apps/gallery/scripts/seed-styles-demo.py` → `apps/gallery/test-results/STYLES_ORIGINAL_INTEGRITY.md` (SHA-256), or the earlier `seed-sets-demo.py` / `ORIGINAL_INTEGRITY.md`.
 
 Thumbnails/previews are separate display renditions under `/data/storage/thumbnails`.
 

@@ -1,0 +1,28 @@
+{
+  "id": "mini-momentz",
+  "display_name": "Mini Momentz",
+  "logo_placeholder": "../placeholders/mini-momentz-logo.png",
+  "logo_note": "LABELLED PLACEHOLDER — no separate genuine logo file in Project store yet. Do not redraw from chat screenshot. Replace when owner supplies official mark.",
+  "default_style": "modern-story",
+  "brand_specs_source": "media/brand-guidelines/mini-momentz-tattva-brand-specs.jpg",
+  "typography": {
+    "body_headings": "Futura Now Regular (NOT shipped — geometric system/Montserrat fallback; no pirated fonts)",
+    "labels": "Futura Now Bold (same fallback policy)",
+    "decorative": "Peach Blossom — skipped until licensed file supplied"
+  },
+  "colours": {
+    "teal": "#8CCAC6",
+    "dark_teal": "#578884",
+    "terracotta": "#D36727",
+    "mustard": "#F7BF57",
+    "charcoal": "#696969"
+  },
+  "ui_note": "Warm light gallery; teal/terracotta/mustard as restrained accents; photos dominate.",
+  "demo_event": {
+    "client_name": "Divya & Ravi",
+    "gallery_name": "Seemantham",
+    "event_date": "2026-10-12",
+    "welcome": "Your Mini Momentz gallery — Modern Story. Tap a heart to favourite. Download originals anytime. Demo media only.",
+    "sets": ["Outdoor Portraits", "Ceremony", "Family", "Highlights Film"]
+  }
+}

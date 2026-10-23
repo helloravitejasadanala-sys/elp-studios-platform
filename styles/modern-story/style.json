@@ -1,0 +1,34 @@
+{
+  "id": "modern-story",
+  "name": "Modern Story",
+  "description": "Mini Momentz storytelling — warm light gallery, geometric sans approximating Futura, teal/terracotta/mustard as restrained accents. Photos dominate. Macro-inspired spacing only; not Macro branding.",
+  "intended_brands": ["mini-momentz", "katha-films-events"],
+  "typography": {
+    "body_heading": {
+      "intended": "Futura Now Regular",
+      "fallback": "Avenir Next, Avenir, Montserrat, 'Century Gothic', Futura, system-ui, sans-serif",
+      "note": "LICENSED FILES NOT AVAILABLE — do not ship pirated Futura Now. System/geometric sans stack (Avenir Next / Century Gothic / Futura keyword / system-ui) approximates Futura. PicPeak CSS sanitizer BLOCKS @import — no Google Fonts CDN in gallery.css."
+    },
+    "labels": {
+      "intended": "Futura Now Bold",
+      "fallback": "Avenir Next Bold, Montserrat 600/700, 'Century Gothic', Futura, system-ui, sans-serif",
+      "note": "Same fallback policy as Regular — bold weight of geometric stack only."
+    },
+    "decorative": {
+      "intended": "Peach Blossom",
+      "fallback": "skip / omit",
+      "note": "Rare decorative only. No licensed file in store — SKIP in UI until owner supplies; do not substitute a random script font that could be mistaken for brand."
+    }
+  },
+  "colours": {
+    "teal": "#8CCAC6",
+    "dark_teal": "#578884",
+    "terracotta": "#D36727",
+    "mustard": "#F7BF57",
+    "charcoal": "#696969",
+    "note": "Owner-supplied Mini Momentz palette (2026-10-23 brand specs image). Warm light UI; colours as restrained accents only."
+  },
+  "css_file": "gallery.css",
+  "picpeak_css_slot": 2,
+  "picpeak_template_name": "ELP Style B — Modern Story (Mini Momentz)"
+}

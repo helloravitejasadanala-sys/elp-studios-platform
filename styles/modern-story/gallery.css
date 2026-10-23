@@ -1,0 +1,133 @@
+/*
+ * ELP Style B — Modern Story (Mini Momentz)
+ * Owner palette: Teal / Dark Teal / Terracotta / Mustard / Charcoal.
+ * Fonts: Futura Now NOT shipped (no piracy). No external-font-import (PicPeak sanitizer).
+ * Geometric system stack approximates Futura. Peach Blossom skipped.
+ * Scope: .gallery-page. Macro = spacing inspiration only.
+ */
+
+.gallery-page {
+  --brand-teal: #8ccac6;
+  --brand-dark-teal: #578884;
+  --brand-terracotta: #d36727;
+  --brand-mustard: #f7bf57;
+  --brand-charcoal: #696969;
+
+  --gallery-bg: #faf9f7;
+  --gallery-bg-secondary: #ffffff;
+  --gallery-text: #2c2c2c;
+  --gallery-text-muted: #696969;
+  --gallery-accent: #578884;
+  --gallery-accent-hover: #456e6b;
+  --gallery-border: #e8e6e3;
+  --gallery-shadow: none;
+  --gallery-radius: 2px;
+  --gallery-spacing: 22px;
+  --gallery-heading-font: "Avenir Next", Avenir, "Century Gothic", Futura, system-ui, sans-serif;
+  --gallery-ui-font: "Avenir Next", Avenir, "Century Gothic", Futura, system-ui, sans-serif;
+
+  background: var(--gallery-bg) !important;
+  color: var(--gallery-text);
+  font-family: var(--gallery-ui-font);
+  font-weight: 400;
+}
+
+.gallery-page .gallery-header {
+  border-bottom: 1px solid #e8e6e3;
+}
+
+.gallery-page .gallery-title,
+.gallery-page .gallery-hero h1,
+.gallery-page h1 {
+  font-family: var(--gallery-heading-font);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: #2c2c2c;
+}
+
+.gallery-page .gallery-btn-download,
+.gallery-page .gallery-btn.gallery-btn-download {
+  background: #578884 !important;
+  border-color: #578884 !important;
+  color: #fafaf9 !important;
+  border-radius: 2px !important;
+  font-family: var(--gallery-ui-font);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+}
+
+.gallery-page .gallery-btn-download:hover {
+  background: #456e6b !important;
+  border-color: #456e6b !important;
+}
+
+.gallery-page .gallery-btn-logout,
+.gallery-page .gallery-premium-nav-btn {
+  border-radius: 2px !important;
+  font-family: var(--gallery-ui-font);
+  letter-spacing: 0.04em;
+  color: #696969;
+  border-color: #e8e6e3;
+}
+
+.gallery-page .gallery-sidebar-section-title,
+.gallery-page .folder-title,
+.gallery-page .category-title {
+  font-family: var(--gallery-heading-font);
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  color: #2c2c2c;
+  border-left: 3px solid #8ccac6;
+  padding-left: 0.75em;
+}
+
+.gallery-page .photo-grid,
+.gallery-page .gallery-grid,
+.gallery-page .gallery-photos {
+  gap: clamp(6px, 1vw, 12px);
+}
+
+.gallery-page .photo-grid img,
+.gallery-page .photo-card img {
+  border-radius: 2px;
+}
+
+.gallery-page a {
+  color: #578884;
+}
+
+.gallery-page .gallery-favorite-active,
+.gallery-page .gallery-premium-feedback-indicator {
+  color: #d36727;
+}
+
+.gallery-page button[type="submit"],
+.gallery-page .gallery-password button {
+  background: #578884 !important;
+  border-color: #578884 !important;
+  color: #fafaf9 !important;
+  border-radius: 2px !important;
+  font-family: var(--gallery-ui-font);
+  letter-spacing: 0.04em;
+}
+
+.gallery-page .gallery-login,
+.gallery-page .gallery-password,
+.gallery-page .password-form {
+  border: 1px solid #e8e6e3;
+  background: #ffffff;
+}
+
+.gallery-page :focus-visible {
+  outline: 2px solid #8ccac6;
+  outline-offset: 2px;
+}
+
+@media (max-width: 640px) {
+  .gallery-page .photo-grid,
+  .gallery-page .gallery-grid {
+    gap: 4px;
+  }
+}

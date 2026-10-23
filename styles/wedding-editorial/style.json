@@ -1,0 +1,34 @@
+{
+  "id": "wedding-editorial",
+  "name": "Wedding Editorial",
+  "description": "Tattva Weddings editorial — Soft Ivory surfaces, elegant serif titles, Deep Crimson accents (not generic gold/bronze). Macro-inspired spacing only; not Macro branding.",
+  "intended_brands": ["tattva-weddings", "katha-films-weddings"],
+  "typography": {
+    "title": {
+      "intended": "Bizantheum",
+      "fallback": "Cormorant Garamond, Libre Baskerville, Georgia, 'Times New Roman', serif",
+      "note": "OFFICIAL FONT NOT SHIPPED — Bizantheum files not in store; do not extract from PDFs. Google-licensed Cormorant Garamond used as elegant editorial serif stand-in until owner supplies licensed files."
+    },
+    "subheading": {
+      "intended": "Canela Trial Light",
+      "fallback": "Cormorant Garamond (300/400), Georgia, serif",
+      "note": "Canela Trial — trial licensing; do not embed trial files in production without a license. Fallback serif only until owner supplies licensed Canela (or approved substitute)."
+    },
+    "body": {
+      "intended": "Poppins Light",
+      "fallback": "system-ui, Segoe UI, Helvetica Neue, sans-serif",
+      "note": "Poppins Light preferred when self-hosted licensed files are available. PicPeak CSS sanitizer BLOCKS @import of Google Fonts CDN — do not rely on external @import in gallery.css. System UI light stack used until owner supplies files or a sanitizer-safe font path."
+    }
+  },
+  "colours": {
+    "deep_crimson": "#AB202C",
+    "coral_red": "#F3514B",
+    "plum_purple": "#461345",
+    "royal_magenta": "#B40099",
+    "soft_ivory": "#F8F6F3",
+    "note": "Owner-supplied Tattva palette (2026-10-23 brand specs image). Soft Ivory backgrounds; Deep Crimson for selected UI accents. NOT gold/bronze wedding defaults."
+  },
+  "css_file": "gallery.css",
+  "picpeak_css_slot": 1,
+  "picpeak_template_name": "ELP Style A — Wedding Editorial (Tattva)"
+}

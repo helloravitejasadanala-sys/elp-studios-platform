@@ -1,0 +1,134 @@
+/*
+ * ELP Style A — Wedding Editorial (Tattva Weddings)
+ * Owner palette: Soft Ivory / Deep Crimson / Plum (NOT gold/bronze).
+ * Fonts: Bizantheum / Canela Trial NOT shipped. No external-font-import (PicPeak sanitizer
+ * blocks external font imports). System + Georgia/Times serif + system-ui Light.
+ * Scope: .gallery-page. Macro = spacing inspiration only.
+ */
+
+.gallery-page {
+  --brand-deep-crimson: #ab202c;
+  --brand-coral-red: #f3514b;
+  --brand-plum-purple: #461345;
+  --brand-royal-magenta: #b40099;
+  --brand-soft-ivory: #f8f6f3;
+
+  --gallery-bg: #f8f6f3;
+  --gallery-bg-secondary: #ffffff;
+  --gallery-text: #461345;
+  --gallery-text-muted: #6b5a6a;
+  --gallery-accent: #ab202c;
+  --gallery-accent-hover: #8a1a24;
+  --gallery-border: #e8e2dc;
+  --gallery-shadow: none;
+  --gallery-radius: 0;
+  --gallery-spacing: 28px;
+  --gallery-heading-font: Georgia, "Times New Roman", "Palatino Linotype", Palatino, serif;
+  --gallery-ui-font: system-ui, "Segoe UI", "Helvetica Neue", sans-serif;
+
+  background: var(--gallery-bg) !important;
+  color: var(--gallery-text);
+  font-family: var(--gallery-ui-font);
+  font-weight: 300;
+}
+
+.gallery-page .gallery-header,
+.gallery-page .gallery-premium,
+.gallery-page .gallery-story {
+  background: transparent;
+}
+
+.gallery-page .gallery-title,
+.gallery-page h1 {
+  font-family: var(--gallery-heading-font);
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  color: #461345;
+}
+
+/* Hero overlay sits on photography — Soft Ivory type for contrast (not plum-on-plum) */
+.gallery-page .gallery-hero,
+.gallery-page .gallery-hero h1,
+.gallery-page .gallery-hero .gallery-title {
+  color: #f8f6f3 !important;
+  font-family: var(--gallery-heading-font);
+}
+
+.gallery-page .gallery-btn-download,
+.gallery-page .gallery-btn.gallery-btn-download {
+  background: #ab202c !important;
+  border-color: #ab202c !important;
+  color: #f8f6f3 !important;
+  border-radius: 0 !important;
+  font-family: var(--gallery-ui-font);
+  font-weight: 400;
+  letter-spacing: 0.06em;
+}
+
+.gallery-page .gallery-btn-download:hover {
+  background: #8a1a24 !important;
+  border-color: #8a1a24 !important;
+}
+
+.gallery-page .gallery-btn-logout,
+.gallery-page .gallery-premium-nav-btn {
+  border-radius: 0 !important;
+  font-family: var(--gallery-ui-font);
+  letter-spacing: 0.05em;
+  color: #461345;
+  border-color: #e8e2dc;
+}
+
+.gallery-page .gallery-sidebar-section-title,
+.gallery-page .folder-title,
+.gallery-page .category-title {
+  font-family: var(--gallery-heading-font);
+  font-weight: 400;
+  letter-spacing: 0.03em;
+  color: #461345;
+}
+
+.gallery-page .photo-grid,
+.gallery-page .gallery-grid,
+.gallery-page .gallery-photos {
+  gap: clamp(12px, 1.5vw, 22px);
+}
+
+.gallery-page .photo-grid img,
+.gallery-page .photo-card img {
+  border-radius: 0;
+}
+
+.gallery-page a {
+  color: #ab202c;
+}
+
+.gallery-page button[type="submit"],
+.gallery-page .gallery-password button {
+  background: #ab202c !important;
+  border-color: #ab202c !important;
+  color: #f8f6f3 !important;
+  border-radius: 0 !important;
+  font-family: var(--gallery-ui-font);
+  font-weight: 300;
+  letter-spacing: 0.06em;
+}
+
+.gallery-page .gallery-login,
+.gallery-page .gallery-password,
+.gallery-page .password-form {
+  border: 1px solid #e8e2dc;
+  background: #ffffff;
+}
+
+.gallery-page :focus-visible {
+  outline: 1px solid #ab202c;
+  outline-offset: 3px;
+}
+
+@media (max-width: 640px) {
+  .gallery-page .photo-grid,
+  .gallery-page .gallery-grid {
+    gap: 8px;
+  }
+}

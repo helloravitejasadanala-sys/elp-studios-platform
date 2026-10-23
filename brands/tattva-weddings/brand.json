@@ -1,0 +1,28 @@
+{
+  "id": "tattva-weddings",
+  "display_name": "Tattva Weddings",
+  "logo_placeholder": "../placeholders/tattva-weddings-logo.png",
+  "logo_note": "LABELLED PLACEHOLDER — no separate genuine logo file in Project store yet. Do not redraw from chat screenshot. Replace when owner supplies official mark.",
+  "default_style": "wedding-editorial",
+  "brand_specs_source": "media/brand-guidelines/mini-momentz-tattva-brand-specs.jpg",
+  "typography": {
+    "titles": "Bizantheum (NOT shipped — Cormorant Garamond fallback; do not extract from PDF)",
+    "subheadings": "Canela Trial Light (trial license — fallback serif until licensed file supplied)",
+    "body": "Poppins Light (Google Fonts CDN)"
+  },
+  "colours": {
+    "deep_crimson": "#AB202C",
+    "coral_red": "#F3514B",
+    "plum_purple": "#461345",
+    "royal_magenta": "#B40099",
+    "soft_ivory": "#F8F6F3"
+  },
+  "ui_note": "Soft Ivory backgrounds; elegant editorial type; subtle Deep Crimson accents. NOT generic gold/bronze wedding theme.",
+  "demo_event": {
+    "client_name": "Ananya & Rohan",
+    "gallery_name": "Wedding Day",
+    "event_date": "2026-10-05",
+    "welcome": "Your Tattva Weddings gallery — Wedding Editorial. Soft Ivory and Deep Crimson accents. Favourites and original downloads. Demo media only.",
+    "sets": ["Getting Ready", "Ceremony", "Portraits", "Reception Film"]
+  }
+}
