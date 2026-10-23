@@ -40,6 +40,96 @@ GALLERY_DIR = Path(__file__).resolve().parent
 BRANDS_DIR = Path(os.environ.get("ELP_BRANDS_DIR", REPO_ROOT / "brands"))
 STYLES_DIR = Path(os.environ.get("ELP_STYLES_DIR", REPO_ROOT / "styles"))
 
+# PicPeak aio:stable admin session cookie. The login JSON has `user` only;
+# the JWT is Set-Cookie: admin_token=…; HttpOnly; Path=/.
+ADMIN_COOKIE_NAME = "admin_token"
+PICPEAK_LOGIN_PATH = "/api/auth/admin/login"
+PICPEAK_LOGOUT_PATH = "/api/auth/logout"
+PICPEAK_SESSION_PATH = "/api/auth/session"
+
+
+def set_cookie_values(headers) -> list[str]:
+    """All Set-Cookie values from an HTTP header map (urllib / http.client)."""
+    if headers is None:
+        return []
+    getter = getattr(headers, "get_all", None)
+    if callable(getter):
+        values = getter("Set-Cookie") or getter("set-cookie") or []
+        return [v for v in values if v]
+    one = headers.get("Set-Cookie") or headers.get("set-cookie")
+    return [one] if one else []
+
+
+def rewrite_picpeak_cookie_for_proxy(header: str) -> str:
+    """Forward PicPeak cookies onto the Studio Console origin (localhost:3080).
+
+    Drop Domain (must not stay ``picpeak``) and Secure (console is HTTP on :3080).
+    Keep HttpOnly and force Path=/ so /pp requests receive admin_token.
+    """
+    raw = (header or "").strip()
+    if not raw:
+        return raw
+    parts = [p.strip() for p in raw.split(";") if p.strip()]
+    kept = [parts[0]]
+    saw_path = False
+    for attr in parts[1:]:
+        key = attr.split("=", 1)[0].strip().lower()
+        if key in {"domain", "secure"}:
+            continue
+        if key == "path":
+            kept.append("Path=/")
+            saw_path = True
+            continue
+        kept.append(attr)
+    if not saw_path:
+        kept.append("Path=/")
+    return "; ".join(kept)
+
+
+def admin_token_from_set_cookie(headers_or_values) -> str | None:
+    """Read the PicPeak JWT from Set-Cookie. Does not invent a token."""
+    if isinstance(headers_or_values, (list, tuple)):
+        values = list(headers_or_values)
+    else:
+        values = set_cookie_values(headers_or_values)
+    prefix = ADMIN_COOKIE_NAME + "="
+    for raw in values:
+        first = raw.split(";", 1)[0].strip()
+        if first.startswith(prefix):
+            token = first[len(prefix) :]
+            if token and token.lower() not in {"deleted", '""', "''"}:
+                return token
+    return None
+
+
+def session_from_picpeak_login(body, set_cookie=None) -> dict:
+    """Interpret aio:stable admin login. Never synthesises a JWT.
+
+    Stable body: ``{"user": {...}}`` plus ``Set-Cookie: admin_token=``.
+    Older bodies may still include ``token``. MFA returns ``mfaRequired``.
+    """
+    data = body if isinstance(body, dict) else {}
+    cookies = set_cookie if isinstance(set_cookie, (list, tuple)) else set_cookie_values(set_cookie)
+    cookie_token = admin_token_from_set_cookie(cookies)
+    json_token = data.get("token") if isinstance(data.get("token"), str) and data.get("token") else None
+    nested = data.get("user") if isinstance(data.get("user"), dict) else {}
+    if not json_token:
+        nested_token = nested.get("token")
+        json_token = nested_token if isinstance(nested_token, str) and nested_token else None
+    token = cookie_token or json_token
+    if data.get("mfaRequired"):
+        return {"ok": False, "reason": "mfa", "user": None, "token": None, "cookie_session": False}
+    user = data.get("user") if isinstance(data.get("user"), dict) else None
+    if not user:
+        return {"ok": False, "reason": "no_session", "user": None, "token": None, "cookie_session": False}
+    return {
+        "ok": True,
+        "reason": None,
+        "user": user,
+        "token": token,
+        "cookie_session": bool(cookie_token),
+    }
+
 ALLOWED_FILE_TYPES = "jpg,jpeg,png,webp,gif,heic,mp4,m4v,mov,webm"
 # PicPeak default photo cap is 50 MB; videos have a separate cap.
 MAX_PHOTO_MB = 50
