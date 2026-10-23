@@ -14,39 +14,34 @@ Last updated: 2026-10-23 (premium multi-brand PicPeak config pass).
 
 | Capability | How | Evidence |
 | --- | --- | --- |
-| Admin login + dashboard | PicPeak native | Screenshots `01`–`03`, `08` |
-| One admin for 3 brands | PicPeak native (single instance) + **our** seed creates Mini Momentz / Katha / Tattva events | Admin events list |
-| Create gallery (few clicks / API) | PicPeak native + `seed-premium-demo.py` | Seed + smoke |
-| Brand select (per gallery) | PicPeak native per-event logo + **our** placeholder logos | Event logos uploaded |
-| Upload photos | PicPeak native | Demo JPGs |
-| Upload finished videos | PicPeak native after **our** `general_allowed_file_types` includes `mp4` | Katha gallery has MP4 |
-| Cover / hero image | PicPeak native `header_style=hero` + `hero_photo_id` | Client screenshots |
-| Password + downloads | PicPeak native | Smoke 15/15 |
-| Copy client link | PicPeak native share URL | Seed JSON paths |
-| Favourites / comments | PicPeak native feedback (+ ensure `feedback_enabled`) | Smoke favourites |
-| Archive / expire | PicPeak native (extend/archive UI); expiry proven | Extend + expired UI earlier |
-| Client password gate | PicPeak native | `04`, `06` |
-| Full-screen cover + title + date | PicPeak native hero header | `05` |
-| Responsive grid + mobile | PicPeak native + **our** photography-first CSS | `07` |
-| Download individual + all | PicPeak native | Smoke downloads |
-| Video in gallery | PicPeak native (after MIME allow) | Katha event media_type=video |
-| Auth / hashed passwords / private galleries | PicPeak native — **not weakened** | Smoke auth negatives |
+| Admin login + dashboard | PicPeak native | Screenshots |
+| Brand → Client → Gallery (convention) | Event naming + customer fields + per-event logo | Sets demo: Mini Momentz → Divya & Ravi → Seemantham |
+| Unlimited Sets | PicPeak `photo_categories` `is_folder=true` | Outdoor Portraits / Ceremony / Family / Highlights Film |
+| Upload into sets | Upload with `category_id` | Seed + integrity |
+| Cover / password / expiry / publish / link | PicPeak native | Seed |
+| Favourites / comments | PicPeak feedback | Smoke |
+| Video in a set | PicPeak + MIME allow-list | Highlights Film MP4 |
+| **Exact original downloads** | `download_standard_resolution=original`, watermarks off | **`ORIGINAL_INTEGRITY.md` — 7/7 SHA-256 PASS** |
+| Original filenames on download | Setting enabled | Configured |
+| Client one-link all sets | Share URL; folders in gallery UI | Screenshots `12`/`13` |
+| Auth / private galleries | PicPeak native — not weakened | Smoke |
 | Docker Compose + Windows README | **Our config** | `apps/gallery/` |
-| Brand placeholder logos | **Our config** | `brands/placeholders/` (labelled) |
-| Photography-first CSS template | **Our config** | `apps/gallery/config/css/photography-first.css` |
+| Brand placeholders + photography CSS | **Our config** | `brands/`, `config/css/` |
+| Capability matrix | **Our docs** | `GAPS.md` |
 
 ## Unfinished / planned
 
 | Item | Notes |
 | --- | --- |
-| Real brand logos & exact brand colours | Placeholders only until owner supplies assets |
-| Branded client hostnames (Tunnel) | Planned — Cloudflare Tunnel |
-| HTTPS for public clients | Planned |
-| Family sharing polish beyond PicPeak share | PicPeak share links exist; no custom share app |
-| Selection-submit workflow UX polish | Favourites/comments work; dedicated “submit selection” packaging planned |
-| Editor workspace UI | Stub only (`apps/editor`) |
-| TrustOS / ELP OS dashboard integration | Design later — do not recreate TrustOS |
-| GitHub push from this agent | Blocked: `cursor[bot]` 403 on `elp-studios-platform` until Cursor GitHub App repo access includes it |
+| First-class Brand entity (vs naming convention) | Optional thin wrapper later — see `GAPS.md` |
+| Real brand logos & colours | Placeholders until owner assets |
+| Per-set one-click ZIP in UI polish | Selected/download-all native; UX packaging planned |
+| Synology storage adapter (read masters) | Interface/docs only — no NAS now |
+| Independent backup automation | Documented; owner Hyper Backup / offsite |
+| Branded hostnames + HTTPS | Cloudflare Tunnel planned |
+| Editor workspace UI | Stub |
+| TrustOS integration | Later |
+| GitHub push | Blocked: Cursor App write on `elp-studios-platform` |
 
 ## UX research (public pages only)
 
