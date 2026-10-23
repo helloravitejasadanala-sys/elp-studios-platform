@@ -1,0 +1,244 @@
+/*
+ * ELP Style A — Wedding Editorial (Tattva Weddings)
+ * Soft Ivory / Deep Crimson / Plum. Macro spacing inspiration only.
+ * Fonts: documented fallbacks (Bizantheum / Canela / Poppins not shipped).
+ * No external-font-import (PicPeak sanitizer). Lightweight CSS only.
+ */
+
+.gallery-page {
+  --brand-deep-crimson: #ab202c;
+  --brand-coral-red: #f3514b;
+  --brand-plum-purple: #461345;
+  --brand-royal-magenta: #b40099;
+  --brand-soft-ivory: #f8f6f3;
+
+  --gallery-bg: #f8f6f3;
+  --gallery-bg-secondary: #ffffff;
+  --gallery-text: #461345;
+  --gallery-text-muted: #6b5a6a;
+  --gallery-accent: #ab202c;
+  --gallery-accent-hover: #8a1a24;
+  --gallery-border: #e8e2dc;
+  --gallery-shadow: none;
+  --gallery-radius: 0;
+  --gallery-spacing: 28px;
+  --gallery-heading-font: Georgia, "Times New Roman", "Palatino Linotype", Palatino, serif;
+  --gallery-ui-font: system-ui, "Segoe UI", "Helvetica Neue", sans-serif;
+
+  background: var(--gallery-bg) !important;
+  color: var(--gallery-text);
+  font-family: var(--gallery-ui-font);
+  font-weight: 300;
+}
+
+/* --- Page chrome --- */
+.gallery-page .gallery-header,
+.gallery-page .gallery-premium,
+.gallery-page .gallery-story {
+  background: transparent;
+}
+
+.gallery-page .gallery-btn-download,
+.gallery-page .gallery-btn.gallery-btn-download {
+  background: #ab202c !important;
+  border-color: #ab202c !important;
+  color: #f8f6f3 !important;
+  border-radius: 0 !important;
+  font-family: var(--gallery-ui-font);
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+}
+
+.gallery-page .gallery-btn-download:hover {
+  background: #8a1a24 !important;
+  border-color: #8a1a24 !important;
+}
+
+.gallery-page .gallery-btn-logout,
+.gallery-page .gallery-premium-nav-btn {
+  border-radius: 0 !important;
+  font-family: var(--gallery-ui-font);
+  letter-spacing: 0.06em;
+  color: #461345;
+  border-color: #e8e2dc;
+  background: transparent;
+}
+
+/* --- Hero: Soft Ivory type on dark covers (high contrast) --- */
+/* Do NOT colour all h1 plum — that overrode PicPeak text-white on the hero. */
+.gallery-page h1.text-white,
+.gallery-page h1.drop-shadow-lg,
+.gallery-page .relative.h-\[60vh\] h1,
+.gallery-page .relative.h-\[70vh\] h1,
+.gallery-page .relative.h-\[80vh\] h1,
+.gallery-page div.absolute.inset-0 h1 {
+  color: #f8f6f3 !important;
+  font-family: var(--gallery-heading-font) !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.04em;
+  line-height: 1.15;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+
+.gallery-page div.absolute.inset-0 .text-white\/90,
+.gallery-page div.absolute.inset-0 .text-white\/90 span,
+.gallery-page div.absolute.inset-0 .text-lg,
+.gallery-page div.absolute.inset-0 .text-xl {
+  color: #f8f6f3 !important;
+  opacity: 0.92;
+  font-family: var(--gallery-ui-font);
+  font-weight: 300;
+  letter-spacing: 0.06em;
+}
+
+/* Slightly stronger veil for readable ivory type over varied covers */
+.gallery-page .absolute.inset-0.bg-black {
+  opacity: 0.42 !important;
+}
+
+/* Genuine Tattva logo — size/spacing only (artwork untouched) */
+.gallery-page img[alt="Event logo"] {
+  height: 9.5rem !important;
+  width: auto !important;
+  max-width: min(72vw, 280px);
+  object-fit: contain;
+  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.45)) !important;
+}
+
+@media (min-width: 640px) {
+  .gallery-page img[alt="Event logo"] {
+    height: 11rem !important;
+    max-width: 320px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .gallery-page img[alt="Event logo"] {
+    height: 12.5rem !important;
+    max-width: 360px;
+  }
+}
+
+.gallery-page .my-6:has(img[alt="Event logo"]) {
+  margin-top: 1.75rem !important;
+  margin-bottom: 1.75rem !important;
+}
+
+/* Hero composition — a bit more breathing room */
+.gallery-page .relative.h-\[60vh\].sm\:h-\[70vh\].lg\:h-\[80vh\],
+.gallery-page .relative.max-h-\[700px\] {
+  max-height: 780px !important;
+  margin-bottom: 2.5rem !important;
+}
+
+/* --- Folders / sets --- */
+.gallery-page h2.text-sm {
+  font-family: var(--gallery-ui-font);
+  font-weight: 400;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #6b5a6a !important;
+  font-size: 0.7rem !important;
+  margin-bottom: 1rem !important;
+}
+
+.gallery-page button.group.rounded-lg,
+.gallery-page .group.rounded-lg {
+  border-radius: 0 !important;
+  border-color: #e8e2dc !important;
+  background: #ffffff !important;
+  box-shadow: none !important;
+}
+
+.gallery-page button.group.rounded-lg:hover,
+.gallery-page .group.rounded-lg:hover {
+  box-shadow: none !important;
+  border-color: #ab202c !important;
+}
+
+.gallery-page button.group img,
+.gallery-page .group img {
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  min-height: 140px;
+}
+
+@media (min-width: 768px) {
+  .gallery-page button.group img,
+  .gallery-page .group img {
+    min-height: 180px;
+  }
+}
+
+.gallery-page button.group .font-medium,
+.gallery-page .group .font-medium {
+  font-family: var(--gallery-heading-font);
+  font-weight: 400;
+  letter-spacing: 0.03em;
+  color: #461345;
+  font-size: 1.05rem;
+}
+
+/* --- Password gate --- */
+.gallery-page .gallery-login,
+.gallery-page .gallery-password,
+.gallery-page .password-form {
+  border: 1px solid #e8e2dc;
+  background: #ffffff;
+  border-radius: 0;
+}
+
+.gallery-page button[type="submit"],
+.gallery-page .gallery-password button {
+  background: #ab202c !important;
+  border-color: #ab202c !important;
+  color: #f8f6f3 !important;
+  border-radius: 0 !important;
+  font-family: var(--gallery-ui-font);
+  font-weight: 300;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.gallery-page a {
+  color: #ab202c;
+}
+
+.gallery-page .photo-grid,
+.gallery-page .gallery-grid,
+.gallery-page .gallery-photos {
+  gap: clamp(12px, 1.5vw, 22px);
+}
+
+.gallery-page .photo-grid img,
+.gallery-page .photo-card img {
+  border-radius: 0;
+}
+
+.gallery-page video {
+  width: 100%;
+  max-height: 80vh;
+  background: #111;
+}
+
+.gallery-page :focus-visible {
+  outline: 1px solid #ab202c;
+  outline-offset: 3px;
+}
+
+@media (max-width: 640px) {
+  .gallery-page h1.text-white,
+  .gallery-page h1.drop-shadow-lg {
+    font-size: clamp(1.6rem, 7vw, 2.1rem) !important;
+    letter-spacing: 0.03em;
+  }
+  .gallery-page img[alt="Event logo"] {
+    height: 7rem !important;
+  }
+  .gallery-page .photo-grid,
+  .gallery-page .gallery-grid {
+    gap: 8px;
+  }
+}

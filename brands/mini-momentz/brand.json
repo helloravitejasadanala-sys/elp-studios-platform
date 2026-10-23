@@ -1,0 +1,41 @@
+{
+  "id": "mini-momentz",
+  "display_name": "Mini Momentz",
+  "logos": {
+    "dir": "logos/",
+    "client_primary": "logos/mini-momentz-color-logo.jpg",
+    "client_primary_note": "Colour logo — primary for light / Soft warm-white gallery UI and password gate.",
+    "client_on_dark": "logos/mini-momentz-light-logo.jpg",
+    "client_on_dark_note": "Light/knockout variant — only for dark covers/heroes. PicPeak uses one event logo; seed uses colour primary for light UI demos.",
+    "legacy_placeholder": "../placeholders/mini-momentz-logo.png"
+  },
+  "logo_note": "Genuine owner-supplied marks in logos/ — do not redraw or alter.",
+  "default_style": "modern-story",
+  "brand_specs_source": "media/brand-guidelines/mini-momentz-tattva-brand-specs.jpg",
+  "brand_assets_source": "media/brand-assets/mini-momentz/",
+  "typography": {
+    "body_headings": "Futura Now Regular (NOT shipped — geometric system fallback; no pirated fonts)",
+    "labels": "Futura Now Bold (same fallback policy)",
+    "decorative": "Peach Blossom — skipped until licensed file supplied"
+  },
+  "colours": {
+    "teal": "#8CCAC6",
+    "dark_teal": "#578884",
+    "terracotta": "#D36727",
+    "mustard": "#F7BF57",
+    "charcoal": "#696969"
+  },
+  "ui_note": "Warm light gallery; teal/terracotta/mustard as restrained accents; photos dominate.",
+  "event_categories": ["maternity", "newborn", "baby-shower", "birthday", "other"],
+  "client_welcome": "Your Mini Momentz gallery is ready. Tap a heart to favourite, and download originals anytime.",
+  "whatsapp_share_template": "Your photographs are ready! We've put together your gallery so you can relive all those beautiful moments.\n\nView your gallery: {link}\n\nMini Momentz",
+  "email_subject": "Your Mini Momentz gallery is ready",
+  "email_signature": "With love,\nMini Momentz",
+  "demo_event": {
+    "client_name": "Divya & Ravi",
+    "gallery_name": "Seemantham",
+    "event_date": "2026-10-12",
+    "welcome": "Your Mini Momentz gallery — Modern Story. Tap a heart to favourite. Download originals anytime. Demo media only.",
+    "sets": ["Outdoor Portraits", "Ceremony", "Family", "Highlights Film"]
+  }
+}

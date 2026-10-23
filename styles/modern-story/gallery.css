@@ -1,0 +1,268 @@
+/*
+ * ELP Style B — Modern Story (Mini Momentz)
+ * Warm light UI; teal / terracotta accents. Macro spacing inspiration only.
+ * Fonts: Futura Now not shipped — geometric system fallback. No Peach Blossom.
+ * No transparent logo supplied (JPG has white field) — intentional soft logo plate via CSS.
+ * No external-font-import (PicPeak sanitizer). Lightweight CSS only.
+ */
+
+.gallery-page {
+  --brand-teal: #8ccac6;
+  --brand-dark-teal: #578884;
+  --brand-terracotta: #d36727;
+  --brand-mustard: #f7bf57;
+  --brand-charcoal: #696969;
+
+  --gallery-bg: #faf9f7;
+  --gallery-bg-secondary: #ffffff;
+  --gallery-text: #2c2c2c;
+  --gallery-text-muted: #696969;
+  --gallery-accent: #578884;
+  --gallery-accent-hover: #456e6b;
+  --gallery-border: #e8e6e3;
+  --gallery-shadow: none;
+  --gallery-radius: 2px;
+  --gallery-spacing: 22px;
+  --gallery-heading-font: "Avenir Next", Avenir, "Century Gothic", Futura, system-ui, sans-serif;
+  --gallery-ui-font: "Avenir Next", Avenir, "Century Gothic", Futura, system-ui, sans-serif;
+
+  background: var(--gallery-bg) !important;
+  color: var(--gallery-text);
+  font-family: var(--gallery-ui-font);
+  font-weight: 400;
+}
+
+.gallery-page .gallery-header {
+  border-bottom: 1px solid #e8e6e3;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+
+.gallery-page .gallery-btn-download,
+.gallery-page .gallery-btn.gallery-btn-download {
+  background: #578884 !important;
+  border-color: #578884 !important;
+  color: #fafaf9 !important;
+  border-radius: 2px !important;
+  font-family: var(--gallery-ui-font);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 0.7rem;
+}
+
+.gallery-page .gallery-btn-download:hover {
+  background: #456e6b !important;
+  border-color: #456e6b !important;
+}
+
+.gallery-page .gallery-btn-logout,
+.gallery-page .gallery-premium-nav-btn {
+  border-radius: 2px !important;
+  font-family: var(--gallery-ui-font);
+  letter-spacing: 0.04em;
+  color: #696969;
+  border-color: #e8e6e3;
+}
+
+/* --- Hero: keep PicPeak text-white readable (do not force charcoal on hero) --- */
+.gallery-page h1.text-white,
+.gallery-page h1.drop-shadow-lg,
+.gallery-page div.absolute.inset-0 h1 {
+  color: #faf9f7 !important;
+  font-family: var(--gallery-heading-font) !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.06em;
+  line-height: 1.2;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.gallery-page div.absolute.inset-0 .text-white\/90,
+.gallery-page div.absolute.inset-0 .text-white\/90 span,
+.gallery-page div.absolute.inset-0 .text-lg,
+.gallery-page div.absolute.inset-0 .text-xl {
+  color: #faf9f7 !important;
+  opacity: 0.9;
+  font-family: var(--gallery-ui-font);
+  font-weight: 400;
+  letter-spacing: 0.05em;
+}
+
+.gallery-page .absolute.inset-0.bg-black {
+  opacity: 0.32 !important;
+}
+
+/*
+ * Mini logos are JPEG with white fields — no transparent master in store.
+ * On dark/warm hero covers: multiply blend so white field reads as transparent
+ * (CSS only; artwork bytes unchanged). Soft plate kept as deliberate light-UI
+ * treatment when multiply is less helpful.
+ */
+.gallery-page .my-6:has(img[alt="Event logo"]) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1.35rem !important;
+  margin-bottom: 1.35rem !important;
+  padding: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+.gallery-page img[alt="Event logo"] {
+  height: 5.75rem !important;
+  width: auto !important;
+  max-width: min(70vw, 280px);
+  object-fit: contain;
+  background: transparent !important;
+  border-radius: 0;
+  /* White JPG field composites into the cover; colour mark stays */
+  mix-blend-mode: multiply;
+  filter: none !important;
+}
+
+/* Password / light surfaces: soft warm plate instead of floating white slab */
+.gallery-page .gallery-password img[alt="Event logo"],
+.gallery-page .gallery-login img[alt="Event logo"] {
+  mix-blend-mode: normal;
+}
+
+@media (min-width: 640px) {
+  .gallery-page img[alt="Event logo"] {
+    height: 6.5rem !important;
+    max-width: 300px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .gallery-page img[alt="Event logo"] {
+    height: 7.25rem !important;
+    max-width: 340px;
+  }
+}
+
+.gallery-page .relative.max-h-\[700px\] {
+  max-height: 760px !important;
+  margin-bottom: 2.25rem !important;
+}
+
+/* --- Folders --- */
+.gallery-page h2.text-sm {
+  font-family: var(--gallery-ui-font);
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #696969 !important;
+  font-size: 0.7rem !important;
+  margin-bottom: 0.9rem !important;
+}
+
+.gallery-page button.group.rounded-lg,
+.gallery-page .group.rounded-lg {
+  border-radius: 4px !important;
+  border-color: #e8e6e3 !important;
+  background: #ffffff !important;
+  box-shadow: none !important;
+}
+
+.gallery-page button.group.rounded-lg:hover,
+.gallery-page .group.rounded-lg:hover {
+  border-color: #8ccac6 !important;
+  box-shadow: none !important;
+}
+
+.gallery-page button.group img,
+.gallery-page .group img {
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  min-height: 132px;
+  border-radius: 0;
+}
+
+@media (min-width: 768px) {
+  .gallery-page button.group img,
+  .gallery-page .group img {
+    min-height: 168px;
+  }
+}
+
+.gallery-page button.group .font-medium,
+.gallery-page .group .font-medium {
+  font-family: var(--gallery-heading-font);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: #2c2c2c;
+  font-size: 0.98rem;
+  border-left: 3px solid #8ccac6;
+  padding-left: 0.55em;
+  margin-left: 0.15em;
+}
+
+.gallery-page .gallery-favorite-active,
+.gallery-page .gallery-premium-feedback-indicator {
+  color: #d36727;
+}
+
+.gallery-page .gallery-login,
+.gallery-page .gallery-password,
+.gallery-page .password-form {
+  border: 1px solid #e8e6e3;
+  background: #ffffff;
+  border-radius: 4px;
+}
+
+.gallery-page button[type="submit"],
+.gallery-page .gallery-password button {
+  background: #578884 !important;
+  border-color: #578884 !important;
+  color: #fafaf9 !important;
+  border-radius: 2px !important;
+  font-family: var(--gallery-ui-font);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+}
+
+.gallery-page a {
+  color: #578884;
+}
+
+.gallery-page .photo-grid,
+.gallery-page .gallery-grid,
+.gallery-page .gallery-photos {
+  gap: clamp(6px, 1vw, 12px);
+}
+
+.gallery-page .photo-grid img,
+.gallery-page .photo-card img {
+  border-radius: 2px;
+}
+
+.gallery-page video {
+  width: 100%;
+  max-height: 80vh;
+  background: #111;
+}
+
+.gallery-page :focus-visible {
+  outline: 2px solid #8ccac6;
+  outline-offset: 2px;
+}
+
+@media (max-width: 640px) {
+  .gallery-page h1.text-white,
+  .gallery-page h1.drop-shadow-lg {
+    font-size: clamp(1.45rem, 6.5vw, 1.9rem) !important;
+  }
+  .gallery-page img[alt="Event logo"] {
+    height: 4.25rem !important;
+  }
+  .gallery-page .my-6:has(img[alt="Event logo"]) {
+    padding: 0;
+  }
+  .gallery-page .photo-grid,
+  .gallery-page .gallery-grid {
+    gap: 4px;
+  }
+}

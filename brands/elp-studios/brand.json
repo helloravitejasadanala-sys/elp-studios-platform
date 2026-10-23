@@ -1,0 +1,12 @@
+{
+  "id": "elp-studios",
+  "display_name": "ELP Studios",
+  "logos": {
+    "dir": "logos/",
+    "admin_primary": "logos/elp-everlast-pixel-studios-logo.jpg",
+    "admin_primary_note": "Everlast Pixel Studios / ELP mark — platform admin chrome and global branding logo (not a client gallery brand)."
+  },
+  "logo_note": "Genuine owner-supplied mark — do not redraw or alter.",
+  "brand_assets_source": "media/brand-assets/elp/",
+  "usage": "PicPeak global branding / admin — not Style A or Style B client galleries."
+}

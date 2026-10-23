@@ -30,5 +30,7 @@ apps/editor/.data/
 apps/gallery/test-results/last-*.json
 apps/gallery/test-results/premium-demo-galleries.json
 apps/gallery/test-results/sets-demo-gallery.json
+apps/gallery/test-results/styles-demo-galleries.json
 apps/gallery/test-results/original-integrity-raw.json
+apps/gallery/test-results/styles-original-integrity-raw.json
 apps/gallery/test-results/downloads/

@@ -1,48 +1,52 @@
 # Implemented vs Planned
 
-Last updated: 2026-10-23 (premium multi-brand PicPeak config pass).
+Last updated: 2026-10-23 (Storage & cost monitoring on Studio Console).
 
 ## Legend
 
 | Tag | Meaning |
 | --- | --- |
 | **PicPeak native** | Built into `picpeak/aio` — we only configure/use it |
-| **Our config** | Scripts, CSS, brand placeholders, docs in this repo |
+| **Our config** | Scripts, CSS, brand files, Studio Console in this repo |
 | **Planned** | Not done yet |
 
-## Working now (proven)
+## Working now
 
 | Capability | How | Evidence |
 | --- | --- | --- |
-| Admin login + dashboard | PicPeak native | Screenshots |
-| Brand → Client → Gallery (convention) | Event naming + customer fields + per-event logo | Sets demo: Mini Momentz → Divya & Ravi → Seemantham |
-| Unlimited Sets | PicPeak `photo_categories` `is_folder=true` | Outdoor Portraits / Ceremony / Family / Highlights Film |
-| Upload into sets | Upload with `category_id` | Seed + integrity |
-| Cover / password / expiry / publish / link | PicPeak native | Seed |
-| Favourites / comments | PicPeak feedback | Smoke |
-| Video in a set | PicPeak + MIME allow-list | Highlights Film MP4 |
-| **Exact original downloads** | `download_standard_resolution=original`, watermarks off | **`ORIGINAL_INTEGRITY.md` — 7/7 SHA-256 PASS** |
-| Original filenames on download | Setting enabled | Configured |
-| Client one-link all sets | Share URL; folders in gallery UI | Screenshots `12`/`13` |
-| Auth / private galleries | PicPeak native — not weakened | Smoke |
-| Docker Compose + Windows README | **Our config** | `apps/gallery/` |
-| Brand placeholders + photography CSS | **Our config** | `brands/`, `config/css/` |
-| Capability matrix | **Our docs** | `GAPS.md` |
+| Admin login + dashboard | PicPeak native | Existing local install |
+| **Video uploads** | PicPeak native once `general_allowed_file_types` includes `mp4,mov,webm` | Official [Video Support](https://docs.picpeak.app/features/video-support) docs; prior demo SHA-256 of `katha-demo-clip.mp4`; `apply-platform-settings.py` |
+| Mixed photo + video galleries | Native player + FFmpeg poster frames | PicPeak docs; CSS `video` rules in styles |
+| Original downloads | `download_standard_resolution=original`, watermarks off | `STYLES_ORIGINAL_INTEGRITY.md` 12/12 |
+| Optional client email | `event_require_customer_email=false`; create payload omits empty email | `elp_lib.event_create_payload` tests |
+| WhatsApp + copy link | Studio Console | `apps/studio-console/` |
+| Tabbed event create | Studio Console (PicPeak long form unchanged) | Console wizard |
+| Three brands | `brands/*/brand.json` + per-event logo/CSS | Mini/Tattva genuine logos; Katha placeholder |
+| Style A/B/C CSS templates | PicPeak CSS slots 1–3 | `styles/` |
+| Named volume persistence | `elp-picpeak-data` | Compose file; `docs/storage.md` |
+| **Storage & cost monitoring** | PicPeak `storage/info` + ELP 70/85/95% alerts, per-event photo/video, remaining-capacity estimate, archive confirmation **links**, backup status (left off) | Studio Console → Storage; `scripts/storage-report.py`; `docs/storage-and-costs.md` |
+
+## Font / logo status
+
+| Asset | Status |
+| --- | --- |
+| Mini Momentz / Tattva genuine logos | Wired in `brands/*/logos/` |
+| Katha Films logo | **Placeholder only** — no genuine file in repo |
+| Licensed brand fonts | Fallbacks only |
 
 ## Unfinished / planned
 
 | Item | Notes |
 | --- | --- |
-| First-class Brand entity (vs naming convention) | Optional thin wrapper later — see `GAPS.md` |
-| Real brand logos & colours | Placeholders until owner assets |
-| Per-set one-click ZIP in UI polish | Selected/download-all native; UX packaging planned |
-| Synology storage adapter (read masters) | Interface/docs only — no NAS now |
-| Independent backup automation | Documented; owner Hyper Backup / offsite |
-| Branded hostnames + HTTPS | Cloudflare Tunnel planned |
-| Editor workspace UI | Stub |
-| TrustOS integration | Later |
-| GitHub push | Blocked: Cursor App write on `elp-studios-platform` |
+| Native PicPeak create form as tabs | Not customisable without forking PicPeak; use Studio Console |
+| Guest-facing Photos/Videos tabs | Admin Media tab + Studio Console filters. PicPeak guest gallery plays mixed media; type tabs on the **client** gallery are not a stable public API |
+| Browser-playable video copies / HLS | Beta PicPeak only — off on `aio:stable` so originals are not recompressed |
+| Genuine Katha logo | Owner must supply |
+| Licensed fonts | Owner must supply; sanitizer blocks `@import` |
+| Synology hosting | Plan only — `docs/synology-deployment-plan.md` |
+| Independent backup automation | Documented; PicPeak backup stays **off**; owner Hyper Backup / offsite when chosen |
+| Editor workspace / TrustOS | Out of scope here |
 
-## UX research (public pages only)
+## Not production-ready
 
-Patterns used as inspiration (not copied assets/code): Pixieset / Pic-Time / ShootProof public marketing — photography-first covers, minimal chrome, favourites proofing, password delivery, mobile ease, video alongside photos. No e-commerce/payments/CRM in our scope.
+Demo credentials, Katha placeholder logo, font fallbacks, no Tunnel/HTTPS, no NAS. Use locally until NAS health is verified.

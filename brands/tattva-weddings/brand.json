@@ -1,0 +1,46 @@
+{
+  "id": "tattva-weddings",
+  "display_name": "Tattva Weddings",
+  "logos": {
+    "dir": "logos/",
+    "client_primary": "logos/Deep_Crimson_primary_logo_copy_d7b7.svg",
+    "client_primary_note": "Deep Crimson primary SVG — preferred for Soft Ivory / light gallery chrome and Soft Ivory password gate.",
+    "client_secondary": "logos/Deep_Crsimson_secondary_logo_copy_66dc.svg",
+    "client_secondary_note": "Deep Crimson secondary SVG (filename typo Deep_Crsimson kept as supplied).",
+    "alt_plum_primary": "logos/Plum_Purple_primary_logo_37c6.svg",
+    "alt_plum_primary_note": "Plum Purple primary SVG — optional for plum-heavy layouts.",
+    "raster_coral_horizontal": "logos/tattva-coral-horizontal.jpg",
+    "raster_plum_horizontal": "logos/tattva-plum-horizontal.jpg",
+    "raster_note": "Rasters kept if a theme slot rejects SVG; prefer SVG.",
+    "legacy_placeholder": "../placeholders/tattva-weddings-logo.png"
+  },
+  "logo_note": "Genuine owner-supplied marks in logos/ — do not redraw or alter. Prefer SVG.",
+  "default_style": "wedding-editorial",
+  "brand_specs_source": "media/brand-guidelines/mini-momentz-tattva-brand-specs.jpg",
+  "brand_assets_source": "media/brand-assets/tattva/",
+  "typography": {
+    "titles": "Bizantheum (NOT shipped — system/Georgia serif fallback; do not extract from PDF)",
+    "subheadings": "Canela Trial Light (trial — fallback serif until licensed file supplied)",
+    "body": "Poppins Light (fallback system-ui; PicPeak sanitizer blocks external font import)"
+  },
+  "colours": {
+    "deep_crimson": "#AB202C",
+    "coral_red": "#F3514B",
+    "plum_purple": "#461345",
+    "royal_magenta": "#B40099",
+    "soft_ivory": "#F8F6F3"
+  },
+  "ui_note": "Soft Ivory backgrounds; elegant editorial type; subtle Deep Crimson accents. NOT generic gold/bronze wedding theme.",
+  "event_categories": ["wedding", "engagement", "other"],
+  "client_welcome": "Your Tattva Weddings gallery is ready. Favourites and original downloads are available whenever you need them.",
+  "whatsapp_share_template": "Your photographs are ready! We've put together your gallery so you can relive all those beautiful moments.\n\nView your gallery: {link}\n\nTattva Weddings",
+  "email_subject": "Your Tattva Weddings gallery is ready",
+  "email_signature": "With love,\nTattva Weddings",
+  "demo_event": {
+    "client_name": "Ananya & Rohan",
+    "gallery_name": "Wedding Day",
+    "event_date": "2026-10-05",
+    "welcome": "Your Tattva Weddings gallery — Wedding Editorial. Soft Ivory and Deep Crimson accents. Favourites and original downloads. Demo media only.",
+    "sets": ["Getting Ready", "Ceremony", "Portraits", "Reception Film"]
+  }
+}
