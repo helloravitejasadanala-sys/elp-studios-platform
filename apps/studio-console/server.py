@@ -17,7 +17,11 @@ from urllib.error import HTTPError, URLError
 
 HERE = Path(__file__).resolve().parent
 PUBLIC = HERE / "public"
-GALLERY = HERE.parent / "gallery"
+# Repo: apps/studio-console → apps/gallery. Container: /app → /gallery (bind mount).
+_gallery_default = HERE.parent / "gallery"
+if not _gallery_default.is_dir() and Path("/gallery").is_dir():
+    _gallery_default = Path("/gallery")
+GALLERY = Path(os.environ.get("ELP_GALLERY_DIR", _gallery_default))
 sys.path.insert(0, str(GALLERY))
 from elp_lib import (  # noqa: E402
     ARCHIVE_POLICY,

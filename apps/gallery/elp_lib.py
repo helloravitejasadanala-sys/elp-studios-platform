@@ -11,7 +11,31 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from urllib.parse import quote
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+
+def resolve_repo_root(file_path: Path | None = None) -> Path:
+    """Repo root in git; filesystem root in the aio companion container.
+
+    Host layout: ``<root>/apps/gallery/elp_lib.py`` (parents[2] is the root).
+    Docker layout: ``/gallery/elp_lib.py`` — only ``/gallery`` and ``/`` exist,
+    so ``Path.parents[2]`` raises ``IndexError``. Walk up instead, and honour
+    ``ELP_REPO_ROOT`` / ``ELP_BRANDS_DIR`` / ``ELP_STYLES_DIR``.
+    """
+    override = os.environ.get("ELP_REPO_ROOT")
+    if override:
+        return Path(override)
+    start = (file_path or Path(__file__)).resolve()
+    if start.is_file() or start.suffix.lower() == ".py":
+        start = start.parent
+    for candidate in (start, *start.parents):
+        has_brands = (candidate / "brands").is_dir()
+        has_gallery = (candidate / "apps" / "gallery").is_dir()
+        has_styles = (candidate / "styles").is_dir()
+        if has_brands and (has_gallery or has_styles):
+            return candidate
+    return start
+
+
+REPO_ROOT = resolve_repo_root()
 GALLERY_DIR = Path(__file__).resolve().parent
 BRANDS_DIR = Path(os.environ.get("ELP_BRANDS_DIR", REPO_ROOT / "brands"))
 STYLES_DIR = Path(os.environ.get("ELP_STYLES_DIR", REPO_ROOT / "styles"))
