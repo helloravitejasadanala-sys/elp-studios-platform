@@ -34,6 +34,8 @@ from elp_lib import (  # noqa: E402
     build_storage_report,
     load_brands,
     load_dotenv,
+    rewrite_picpeak_cookie_for_proxy,
+    set_cookie_values,
 )
 
 load_dotenv(GALLERY / ".env")
@@ -248,6 +250,12 @@ class Handler(BaseHTTPRequestHandler):
         )
         self._send_json(200, report)
 
+    def _forwarded_cookies(self, headers) -> list:
+        extra = []
+        for raw in set_cookie_values(headers):
+            extra.append(("Set-Cookie", rewrite_picpeak_cookie_for_proxy(raw)))
+        return extra
+
     def _proxy(self, parsed) -> None:
         if not parsed.path.startswith("/pp/"):
             self._send_json(404, {"error": "Not a PicPeak proxy path"})
@@ -268,16 +276,14 @@ class Handler(BaseHTTPRequestHandler):
         try:
             with urlopen(req, timeout=120) as resp:
                 payload = resp.read()
-                extra = []
-                set_cookie = resp.headers.get("Set-Cookie")
-                if set_cookie:
-                    extra.append(("Set-Cookie", set_cookie))
+                extra = self._forwarded_cookies(resp.headers)
                 ctype = resp.headers.get("Content-Type") or "application/octet-stream"
                 self._send(resp.status, payload, ctype, extra)
         except HTTPError as exc:
             payload = exc.read()
-            ctype = exc.headers.get("Content-Type") if exc.headers else "application/json"
-            self._send(exc.code, payload or json.dumps({"error": str(exc)}).encode(), ctype or "application/json")
+            extra = self._forwarded_cookies(exc.headers)
+            ctype = (exc.headers.get("Content-Type") if exc.headers else None) or "application/json"
+            self._send(exc.code, payload or json.dumps({"error": str(exc)}).encode(), ctype, extra)
         except URLError as exc:
             self._send_json(
                 502,
