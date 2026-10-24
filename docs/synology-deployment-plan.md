@@ -1,5 +1,7 @@
 # Future Synology hosting (plan only — do not migrate yet)
 
+**Superseded for new work by** [`../NAS-ARCHITECTURE.md`](../NAS-ARCHITECTURE.md) and [`../SAFE-MIGRATION-PLAN.md`](../SAFE-MIGRATION-PLAN.md). Kept as the Phase 2 note.
+
 This is a deployment **plan**. Do not move galleries, volumes, or DNS until NAS health is verified.
 
 The current live gallery is on the Windows PC Docker volume `elp-picpeak-data`. The NAS previously showed a degraded or missing storage pool. **No copy, rsync, or Container Manager deploy until that is healthy and backed up.**

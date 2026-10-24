@@ -1,6 +1,8 @@
 # Implemented vs Planned
 
-Last updated: 2026-10-23 (Storage & cost monitoring on Studio Console).
+Last updated: 2026-10-24.
+
+**Current plan:** [`ROADMAP-2026.md`](ROADMAP-2026.md). This file is a Phase 2 snapshot. Studio Console is discontinued; PicPeak Admin is the gallery UI.
 
 ## Legend
 

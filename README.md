@@ -1,22 +1,36 @@
 # ELP Studios Platform
 
-Working demo stack for **client galleries** (PicPeak) and a later **editor workspace**.  
+Working demo stack for **client galleries** on official PicPeak (`picpeak/aio:stable`).  
 This repository is **separate from** `trustos-pilot` (TrustOS). Do not merge gallery code into TrustOS.
 
 Brands (client-facing identity per gallery): **Mini Momentz**, **Katha Films**, **Tattva Weddings**.
+
+## 2026 direction (planning)
+
+PicPeak Admin is the permanent gallery UI. We will not build another gallery, replace the native dashboard, or fork PicPeak. Studio Console (`:3080`) is **discontinued** (code kept; do not develop it). The live Windows volume `elp-picpeak-data` stays untouched until you approve a later stage.
+
+| Doc | Purpose |
+| --- | --- |
+| [`ROADMAP-2026.md`](ROADMAP-2026.md) | Audit: working / partial / cancelled; revised stages |
+| [`NAS-ARCHITECTURE.md`](NAS-ARCHITECTURE.md) | Folders, External Media, backups |
+| [`EDITOR-WORKFLOW.md`](EDITOR-WORKFLOW.md) | Photo/video editors on Synology Drive |
+| [`SAFE-MIGRATION-PLAN.md`](SAFE-MIGRATION-PLAN.md) | One stage at a time, with rollback |
+| [`QUESTIONS.md`](QUESTIONS.md) | Synology model, health, capacity, internet |
+
+Do not deploy from this planning work. After you approve, implementation starts at **Stage 1** (a restore-tested `/data` tar) only.
 
 ## What’s in this repo
 
 | Path | Purpose |
 | --- | --- |
 | `apps/gallery/` | PicPeak Docker Compose + sample env + smoke tests |
-| `apps/studio-console/` | ELP tabbed create / brands / WhatsApp companion (does not store media) |
-| `apps/editor/` | Editor workspace (demo UI; later) |
+| `apps/studio-console/` | Discontinued companion UI (kept for history; use PicPeak Admin) |
+| `apps/editor/` | Stub only — Drive + a project sheet first |
 | `demo-media/` | Royalty-free / generated placeholder photos for demos |
 | `docs/phase2-windows.md` | Safe Windows commands to apply Phase 2 without losing galleries |
 | `docs/storage.md` | Where photos live; why capacity looks huge |
 | `docs/storage-and-costs.md` | Usage, 70/85/95% alerts, archive/backup, costs, technical limits |
-| `IMPLEMENTED.md` | Done vs planned checklist |
+| `ROADMAP-2026.md` | Current plan (supersedes IMPLEMENTED/GAPS for *what next*) |
 
 **Hard rules:** no Synology NAS access from agents; demo media only; no real client PII or hardcoded production secrets (use `.env` from `.env.example`).
 

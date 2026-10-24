@@ -2,6 +2,8 @@
 
 Verification against PicPeak docs (2026-10-23) and `picpeak/aio:stable`. Prefer configure/extend; do not fork the image.
 
+**Current plan:** [`ROADMAP-2026.md`](ROADMAP-2026.md). Studio Console rows below are historical — that UI is discontinued.
+
 | Need | PicPeak | Status |
 | --- | --- | --- |
 | Video upload (MP4/MOV) | Native. Default allowed types **exclude** video; add `mp4,mov,webm` | **Configured** via `apply-platform-settings.py` |
