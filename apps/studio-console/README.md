@@ -1,5 +1,7 @@
 # ELP Studio Console
 
+**Discontinued (2026).** PicPeak Admin at http://localhost:3000/admin is the gallery UI. See [`../../ROADMAP-2026.md`](../../ROADMAP-2026.md). This folder is kept for history; do not develop it further.
+
 A small companion for PicPeak: tabbed gallery creation, three-brand picker, optional email, WhatsApp sharing, a simpler dashboard, and **Storage & cost monitoring**.
 
 It does **not** replace PicPeak, store photos, or touch the `elp-picpeak-data` volume.

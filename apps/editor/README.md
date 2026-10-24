@@ -1,5 +1,7 @@
 # Editor workspace (Priority 2)
 
+**2026 plan:** do not build this UI yet. Use Synology Drive and the process in [`../../EDITOR-WORKFLOW.md`](../../EDITOR-WORKFLOW.md). This folder stays a stub.
+
 Simple web UI for photo editors (e.g. Rajesh) and studio admins.
 
 ## Scope for the demo
